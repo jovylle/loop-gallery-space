@@ -18,7 +18,6 @@
     <GalleryManageSection
       v-if="showManageTools"
       :username="username"
-      :storage-bytes="authProfile?.storageBytes"
       @refreshed="onManageRefreshed"
     />
 

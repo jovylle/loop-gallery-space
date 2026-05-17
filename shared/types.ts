@@ -62,6 +62,16 @@ export interface PublicGalleryItem {
   createdAt: string
 }
 
+export interface QuotaUsage {
+  storageBytes: number
+  storageMax: number
+  itemCount: number
+  itemMax: number
+  uploadsToday: number
+  uploadsPerDayMax: number
+  maxUploadBytes: number
+}
+
 export interface AuthUser {
   id: string
   firebaseUid: string

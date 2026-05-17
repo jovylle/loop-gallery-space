@@ -23,8 +23,14 @@
       <p class="text-[var(--text-muted)] mb-1">
         Drop images or short loops here, or
       </p>
-      <p class="text-xs text-[var(--text-muted)] mb-4">
+      <p class="text-xs text-[var(--text-muted)] mb-1">
         Up to {{ maxMb }} MB each · batch upload supported
+      </p>
+      <p v-if="quotaHint" class="text-xs mb-4" :class="quotaHintClass">
+        {{ quotaHint }}
+      </p>
+      <p v-else class="text-xs text-[var(--text-muted)] mb-4">
+        {{ uploadsPerDay }} uploads per day · {{ itemMax }} items max
       </p>
       <button type="button" class="btn-primary" :disabled="busy" @click="inputRef?.click()">
         {{ busy ? progressLabel : 'Choose files' }}
@@ -100,6 +106,7 @@ type QueueEntry = {
 
 const emit = defineEmits<{ uploaded: [] }>()
 const { uploadMany } = useUpload()
+const { usage, refreshQuota, uploadsRemaining } = useQuota()
 
 const inputRef = ref<HTMLInputElement>()
 const dragging = ref(false)
@@ -110,6 +117,31 @@ const summary = ref<{ text: string; failed: number } | null>(null)
 const queue = ref<QueueEntry[]>([])
 
 const maxMb = QUOTAS.maxUploadBytes / 1024 / 1024
+const uploadsPerDay = QUOTAS.maxUploadsPerDay
+const itemMax = QUOTAS.maxItemsPerGallery
+
+const quotaHint = computed(() => {
+  const q = usage.value
+  if (!q) return ''
+  const left = uploadsRemaining(q)
+  if (left === 0) {
+    return `Daily upload limit reached (${q.uploadsToday}/${q.uploadsPerDayMax} today). Try again tomorrow.`
+  }
+  if (left <= 3) {
+    return `${left} upload${left === 1 ? '' : 's'} left today (${q.uploadsToday}/${q.uploadsPerDayMax} used).`
+  }
+  return ''
+})
+
+const quotaHintClass = computed(() =>
+  usage.value && uploadsRemaining(usage.value) === 0
+    ? 'text-amber-400'
+    : 'text-amber-300/90',
+)
+
+onMounted(() => {
+  refreshQuota().catch(() => {})
+})
 
 const doneCount = computed(() =>
   queue.value.filter(e => e.status === 'done' || e.status === 'error').length,
@@ -188,6 +220,26 @@ async function processFiles(files: FileList | File[]) {
     return
   }
 
+  const q = usage.value ?? (await refreshQuota().catch(() => null))
+  if (q) {
+    const left = uploadsRemaining(q)
+    if (left === 0) {
+      error.value = `Daily upload limit reached (${q.uploadsPerDayMax} per day). Try again tomorrow.`
+      return
+    }
+    if (accepted.length > left) {
+      error.value = `You can upload ${left} more file${left === 1 ? '' : 's'} today (${q.uploadsToday}/${q.uploadsPerDayMax} used). Remove ${accepted.length - left} from your selection or try again tomorrow.`
+      return
+    }
+    if (q.itemCount + accepted.length > q.itemMax) {
+      const slots = Math.max(0, q.itemMax - q.itemCount)
+      error.value = slots === 0
+        ? `Your gallery is full (${q.itemMax} items max). Delete something to upload more.`
+        : `Only ${slots} more item${slots === 1 ? '' : 's'} fit in your gallery (${q.itemCount}/${q.itemMax}).`
+      return
+    }
+  }
+
   if (skipped.length) {
     error.value = `Skipped ${skipped.length} unsupported file(s).`
   }
@@ -229,6 +281,7 @@ async function processFiles(files: FileList | File[]) {
       text: parts.join(' · ') || 'Nothing uploaded',
       failed: result.failed,
     }
+    await refreshQuota().catch(() => {})
   }
   catch (e) {
     error.value = e instanceof Error ? e.message : 'Upload failed'

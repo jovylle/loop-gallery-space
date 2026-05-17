@@ -1,4 +1,5 @@
 import { QUOTAS } from '~/shared/constants'
+import { formatUploadError } from '~/shared/upload-errors'
 
 export function useUpload() {
   const { apiFetch } = useAuth()
@@ -31,6 +32,18 @@ export function useUpload() {
   }
 
   async function uploadFile(
+    file: File,
+    options: { kind?: 'item' | 'avatar'; caption?: string } = {},
+  ) {
+    try {
+      return await uploadFileInner(file, options)
+    }
+    catch (e) {
+      throw new Error(formatUploadError(e))
+    }
+  }
+
+  async function uploadFileInner(
     file: File,
     options: { kind?: 'item' | 'avatar'; caption?: string } = {},
   ) {

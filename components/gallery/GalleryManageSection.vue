@@ -12,7 +12,9 @@
       </NuxtLink>
     </div>
 
-    <DashboardUploadDropzone class="mb-10" @uploaded="onUploaded" />
+    <DashboardUploadDropzone class="mb-6" @uploaded="onUploaded" />
+
+    <DashboardQuotaNotes :usage="quotaUsage" class="mb-10" />
 
     <section v-if="items?.length" class="mb-8">
       <h2 class="text-lg font-medium mb-1">Organize</h2>
@@ -27,25 +29,23 @@
       />
     </section>
 
-    <div v-if="storageBytes != null" class="surface-card p-4 text-sm text-[var(--text-muted)]">
-      Storage: {{ formatBytes(storageBytes) }} / {{ formatBytes(quotaMax) }}
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { PublicGalleryItem } from '~/shared/types'
-import { QUOTAS } from '~/shared/constants'
-
 const props = defineProps<{
   username: string
-  storageBytes?: number
 }>()
 
 const emit = defineEmits<{ refreshed: [] }>()
 
 const { apiFetch } = useAuth()
-const quotaMax = QUOTAS.maxStorageBytes
+const { usage: quotaUsage, refreshQuota } = useQuota()
+
+onMounted(() => {
+  refreshQuota().catch(() => {})
+})
 
 const { data: items, refresh: refreshItems } = await useAsyncData(
   'my-items',
@@ -54,8 +54,11 @@ const { data: items, refresh: refreshItems } = await useAsyncData(
 )
 
 async function onUploaded() {
-  await refreshItems()
-  await refreshNuxtData(`profile-${props.username.toLowerCase()}`)
+  await Promise.all([
+    refreshItems(),
+    refreshQuota().catch(() => {}),
+    refreshNuxtData(`profile-${props.username.toLowerCase()}`),
+  ])
   emit('refreshed')
 }
 
@@ -72,14 +75,12 @@ async function onReorder(orderedIds: string[]) {
 async function onDelete(id: string) {
   if (!confirm('Delete this item?')) return
   await apiFetch(`/api/items/${id}`, { method: 'DELETE' })
-  await refreshItems()
-  await refreshNuxtData(`profile-${props.username.toLowerCase()}`)
+  await Promise.all([
+    refreshItems(),
+    refreshQuota().catch(() => {}),
+    refreshNuxtData(`profile-${props.username.toLowerCase()}`),
+  ])
   emit('refreshed')
-}
-
-function formatBytes(n: number) {
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`
-  return `${(n / 1024 / 1024).toFixed(1)} MB`
 }
 
 </script>
