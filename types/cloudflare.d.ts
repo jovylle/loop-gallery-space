@@ -1,12 +1,9 @@
-import type { D1Database, R2Bucket } from '@cloudflare/workers-types'
+import type { LoopGalleryBindings } from '~/server/utils/cloudflare-env'
 
 declare module 'h3' {
   interface H3EventContext {
     cloudflare?: {
-      env?: {
-        DB?: D1Database
-        MEDIA?: R2Bucket
-      }
+      env?: LoopGalleryBindings
     }
   }
 }

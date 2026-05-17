@@ -1,9 +1,10 @@
 import type { R2Bucket } from '@cloudflare/workers-types'
 import { AwsClient } from 'aws4fetch'
+import { CF_BINDINGS } from '~/shared/constants'
+import { getCloudflareEnv } from './cloudflare-env'
 
 export function getMediaBucket(event: H3Event): R2Bucket {
-  const env = (event.context as { cloudflare?: { env?: { MEDIA?: R2Bucket } } }).cloudflare?.env
-  const bucket = env?.MEDIA
+  const bucket = getCloudflareEnv(event)?.[CF_BINDINGS.r2]
   if (!bucket) {
     throw createError({
       statusCode: 503,
@@ -33,7 +34,7 @@ export async function createPresignedPutUrl(
   const secretAccessKey = config.r2SecretAccessKey
 
   if (accountId && accessKeyId && secretAccessKey) {
-    const bucket = 'loopgallery-media'
+    const bucket = CF_BINDINGS.r2
     const url = new URL(
       `https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key}`,
     )

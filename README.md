@@ -32,7 +32,7 @@ npx wrangler pages dev
 1. Create Cloudflare **Pages** project linked to this repo.
 2. Set **production branch** to `master` (auto-deploy on push).
 3. Create **D1** database and **R2** bucket; update `wrangler.toml` `database_id`.
-4. Add bindings in Pages: `DB` → D1, `MEDIA` → R2.
+4. Add bindings in Pages: `loopgallery-db` → D1, `loopgallery-media` → R2 (variable names must match exactly).
 5. Set environment variables from `.env.example`.
 6. Build command: `npm run build && npm run db:migrate:prod`
 

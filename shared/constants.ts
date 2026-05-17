@@ -1,3 +1,9 @@
+/** Cloudflare binding variable names (must match dashboard + wrangler.toml) */
+export const CF_BINDINGS = {
+  d1: 'loopgallery-db',
+  r2: 'loopgallery-media',
+} as const
+
 export const QUOTAS = {
   maxStorageBytes: 100 * 1024 * 1024,
   maxUploadBytes: 8 * 1024 * 1024,
