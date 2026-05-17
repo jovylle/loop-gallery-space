@@ -63,7 +63,7 @@ const props = defineProps<{
 
 const route = useRoute()
 const isPortfolio = useIsTenantGalleryHost()
-const { appUrl, profileUrl } = useProfileUrl()
+const { appUrl, profileUrl, navigateToHref } = useProfileUrl()
 const { profile: authProfile, loading: authLoading, isAuthenticated } = useAuth()
 
 const isManageMode = computed(() => route.query.manage === '1')
@@ -87,11 +87,15 @@ const displayItems = computed(() =>
 )
 
 watch(
-  [isManageMode, authLoading, isAuthenticated],
+  [isManageMode, authLoading, isAuthenticated, isOwner],
   () => {
     if (!import.meta.client || !isManageMode.value || authLoading.value) return
     if (!isAuthenticated.value) {
       navigateTo(`/login?next=${encodeURIComponent(route.fullPath)}`)
+      return
+    }
+    if (!isOwner.value) {
+      navigateToHref(homeUrl.value)
     }
   },
   { immediate: true },

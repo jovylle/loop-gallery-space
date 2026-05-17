@@ -27,20 +27,15 @@ definePageMeta({ layout: 'default' })
 
 const { signInWithGoogle, user, profile, loading, isConfigured } = useAuth()
 const route = useRoute()
-const { navigateToManageProfile, navigateToHref } = useProfileUrl()
+const { navigateToHref, resolvePostLoginPath } = useProfileUrl()
 const signingIn = ref(false)
 const error = ref('')
 
 function goAfterLogin() {
-  if (!profile.value?.username) return
-  const next = route.query.next
-  if (typeof next === 'string' && next.length > 0) {
-    if (/^https?:\/\//i.test(next)) {
-      return navigateTo(next, { external: true })
-    }
-    return navigateToHref(next.startsWith('/') ? next : `/${next}`)
-  }
-  return navigateToManageProfile(profile.value.username)
+  const username = profile.value?.username
+  if (!username) return
+  const next = typeof route.query.next === 'string' ? route.query.next : undefined
+  return navigateToHref(resolvePostLoginPath(next, username))
 }
 
 watch(

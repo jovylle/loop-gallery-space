@@ -31,6 +31,7 @@
 <script setup lang="ts">
 const tenant = useTenantUsername()
 const { manageProfileUrl } = useProfileUrl()
+const { profile: authProfile, isAuthenticated } = useAuth()
 
 const { data: profile } = useTenantProfile(tenant)
 
@@ -42,7 +43,8 @@ const siteTitle = computed(() => {
 })
 
 const manageLink = computed(() => {
-  if (!tenant.value) return ''
+  if (!tenant.value || !isAuthenticated.value) return ''
+  if (authProfile.value?.username?.toLowerCase() !== tenant.value.toLowerCase()) return ''
   return manageProfileUrl(tenant.value)
 })
 </script>

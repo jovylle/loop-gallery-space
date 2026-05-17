@@ -62,6 +62,24 @@ export function useProfileUrl() {
     return navigateToHref(manageProfileUrl(username))
   }
 
+  /** Post-login destination: own dashboard unless `next` is a safe same-origin path. */
+  function resolvePostLoginPath(next: string | undefined, ownUsername: string): string {
+    const own = ownUsername.toLowerCase()
+    const fallback = manageProfileUrl(own)
+
+    if (!next?.length) return fallback
+    if (/^https?:\/\//i.test(next)) return fallback
+
+    const path = next.startsWith('/') ? next : `/${next}`
+
+    if (path.includes('manage=1')) {
+      const match = path.match(/^\/([a-z0-9_]{3,24})(?:\/|\?|$)/i)
+      if (match && match[1]!.toLowerCase() !== own) return fallback
+    }
+
+    return path
+  }
+
   /** Props for NuxtLink when `to` may be a full https URL. */
   function linkTo(url: string) {
     return isAbsoluteUrl(url) ? { to: url, external: true as const } : { to: url }
@@ -108,6 +126,7 @@ export function useProfileUrl() {
     navigateToHref,
     navigateToProfile,
     navigateToManageProfile,
+    resolvePostLoginPath,
     linkTo,
     profileLink,
     profileLinkNewTab,
