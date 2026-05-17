@@ -29,14 +29,31 @@ npx wrangler pages dev
 
 ## Deploy (production)
 
-1. Create Cloudflare **Pages** project linked to this repo.
-2. Set **production branch** to `master` (auto-deploy on push).
-3. Create **D1** database and **R2** bucket; update `wrangler.toml` `database_id`.
-4. Add bindings in Pages: `loopgallery-db` → D1, `loopgallery-media` → R2 (variable names must match exactly).
-5. Set environment variables from `.env.example`.
-6. Build command: `npm run build && npm run db:migrate:prod`
+This repo targets **Cloudflare Workers** with Git (service name: `loop-gallery-space`), not classic Pages upload.
 
-Merge to `master` → production deploys automatically.
+### Workers Builds (dashboard)
+
+In **Workers & Pages** → **loop-gallery-space** → **Settings** → **Builds**:
+
+| Setting | Value |
+|---------|--------|
+| **Build command** | `npm run build` |
+| **Deploy command** | `npx wrangler deploy` |
+| **Build output directory** | leave empty (Pages-only field) |
+
+Bindings on the Worker: `loopgallery-db` (D1), `loopgallery-media` (R2).  
+Secrets: Firebase vars from `.env.example`.
+
+Run D1 migrations once locally: `npm run db:migrate:prod`
+
+Merge to `master` → build + deploy run automatically.
+
+### Manual deploy
+
+```bash
+npm run build
+npm run deploy
+```
 
 ## Quotas (free tier guardrails)
 

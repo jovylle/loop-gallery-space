@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
+    "deploy": "wrangler deploy",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "db:migrate": "wrangler d1 migrations apply loopgallery-db --local",
