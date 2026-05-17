@@ -15,9 +15,7 @@
       {{ signingIn ? 'Setting up your space…' : 'Continue with Google' }}
     </button>
     <p v-else class="text-amber-400 text-sm">
-      Firebase is not configured. Add secrets on the
-      <strong>loop-gallery-space</strong> Worker (Settings → Variables) — see
-      <code class="font-mono">.env.example</code> for names — then redeploy.
+      Firebase is not configured. Check <code class="font-mono">shared/firebase.config.ts</code>.
     </p>
 
     <p v-if="error" class="mt-4 text-red-400 text-sm">{{ error }}</p>

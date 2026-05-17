@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose'
+import { firebaseProjectId } from '~/shared/firebase.config'
 import type { UserRecord } from '~/shared/types'
 
 const jwksCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
@@ -22,11 +23,7 @@ export async function verifyFirebaseToken(event: H3Event): Promise<{ uid: string
   }
 
   const token = authHeader.slice(7)
-  const config = useRuntimeConfig(event)
-  const projectId =
-    getWorkerEnv(event, 'FIREBASE_PROJECT_ID')
-    || config.firebaseProjectId
-    || config.public.firebaseProjectId
+  const projectId = firebaseProjectId
 
   if (!projectId) {
     throw createError({ statusCode: 500, statusMessage: 'Firebase project not configured' })

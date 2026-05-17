@@ -1,3 +1,5 @@
+import { firebaseWebConfig } from './shared/firebase.config'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-04-01',
   devtools: { enabled: true },
@@ -30,15 +32,14 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    firebaseProjectId: process.env.FIREBASE_PROJECT_ID || '',
     r2AccountId: process.env.R2_ACCOUNT_ID || '',
     r2AccessKeyId: process.env.R2_ACCESS_KEY_ID || '',
     r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
     public: {
-      firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || '',
-      firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
-      firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || '',
-      firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '',
+      firebaseApiKey: firebaseWebConfig.apiKey,
+      firebaseAuthDomain: firebaseWebConfig.authDomain,
+      firebaseProjectId: firebaseWebConfig.projectId,
+      firebaseAppId: firebaseWebConfig.appId,
       mediaBaseUrl: process.env.NUXT_PUBLIC_MEDIA_BASE_URL || '',
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     },

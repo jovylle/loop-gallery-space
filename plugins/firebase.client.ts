@@ -1,32 +1,13 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth'
+import { firebaseWebConfig } from '~/shared/firebase.config'
 
 let app: FirebaseApp | null = null
 let auth: Auth | null = null
 
-export default defineNuxtPlugin(async () => {
-  let firebaseConfig: {
-    apiKey: string
-    authDomain: string
-    projectId: string
-    appId: string
-  }
-
-  try {
-    firebaseConfig = await $fetch('/api/config/firebase')
-  }
-  catch (e) {
-    console.warn('[LoopGallery] Could not load Firebase config:', e)
-    return {
-      provide: {
-        firebaseAuth: null as Auth | null,
-        googleProvider: null as GoogleAuthProvider | null,
-      },
-    }
-  }
-
-  if (!firebaseConfig.apiKey) {
-    console.warn('[LoopGallery] Firebase API key missing on server.')
+export default defineNuxtPlugin(() => {
+  if (!firebaseWebConfig.apiKey) {
+    console.warn('[LoopGallery] Firebase API key missing in shared/firebase.config.ts')
     return {
       provide: {
         firebaseAuth: null as Auth | null,
@@ -37,10 +18,10 @@ export default defineNuxtPlugin(async () => {
 
   if (!getApps().length) {
     app = initializeApp({
-      apiKey: firebaseConfig.apiKey,
-      authDomain: firebaseConfig.authDomain,
-      projectId: firebaseConfig.projectId,
-      appId: firebaseConfig.appId,
+      apiKey: firebaseWebConfig.apiKey,
+      authDomain: firebaseWebConfig.authDomain,
+      projectId: firebaseWebConfig.projectId,
+      appId: firebaseWebConfig.appId,
     })
   }
   else {

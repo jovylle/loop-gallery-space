@@ -14,7 +14,8 @@ A personal visual gallery platform — your own corner of the internet. Collect 
 
 ```bash
 cp .env.example .env
-# Fill in Firebase and optional R2 S3 credentials
+# Optional: R2 S3 credentials for presigned uploads
+# Firebase web config lives in shared/firebase.config.ts (committed, public)
 
 npm install
 npm run db:migrate   # local D1 (requires wrangler)
@@ -42,7 +43,8 @@ In **Workers & Pages** → **loop-gallery-space** → **Settings** → **Builds*
 | **Build output directory** | leave empty (Pages-only field) |
 
 Bindings on the Worker: `loopgallery-db` (D1), `loopgallery-media` (R2).  
-Secrets: Firebase vars from `.env.example`.
+Firebase is baked into the build via `shared/firebase.config.ts` — no Worker secrets needed for sign-in.  
+Optional secrets: `R2_*` only if you use presigned uploads.
 
 Run D1 migrations once locally: `npm run db:migrate:prod`
 
