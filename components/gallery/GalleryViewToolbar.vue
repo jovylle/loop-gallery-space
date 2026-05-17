@@ -8,7 +8,7 @@
     </p>
     <div class="flex flex-wrap items-center gap-3">
       <div
-        class="inline-flex p-1 rounded-full bg-white/5 border border-white/10"
+        class="inline-flex p-1 rounded-full border border-[var(--border-strong)] bg-[var(--surface-hover)]"
         role="group"
         aria-label="View mode"
       >

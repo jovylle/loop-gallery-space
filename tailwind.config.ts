@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 export default {
+  darkMode: 'class',
   content: [],
   theme: {
     extend: {
@@ -14,7 +15,7 @@ export default {
         accent: 'var(--accent)',
       },
       boxShadow: {
-        soft: '0 8px 32px rgba(0, 0, 0, 0.35)',
+        soft: 'var(--shadow-soft)',
         glow: '0 0 24px color-mix(in srgb, var(--accent) 35%, transparent)',
       },
       animation: {

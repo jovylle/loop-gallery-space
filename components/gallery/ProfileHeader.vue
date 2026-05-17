@@ -25,7 +25,7 @@
         :href="link.url"
         target="_blank"
         rel="noopener noreferrer"
-        class="px-3 py-1 rounded-full text-xs font-mono bg-white/5 hover:bg-white/10 border border-white/10 transition"
+        class="chip-link"
       >
         {{ link.label }}
       </a>

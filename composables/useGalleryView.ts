@@ -8,7 +8,7 @@ import type { PublicGalleryItem } from '~/shared/types'
 
 export function useGalleryView() {
   const viewMode = useLocalStorage<GalleryViewMode>('loopgallery-view-mode', 'masonry')
-  const sortMode = useLocalStorage<GallerySortMode>('loopgallery-sort-mode', 'order')
+  const sortMode = useLocalStorage<GallerySortMode>('loopgallery-sort-mode', 'newest')
 
   function sortedItems(items: PublicGalleryItem[]) {
     return sortGalleryItems(items, sortMode.value)

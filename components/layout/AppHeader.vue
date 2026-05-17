@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky top-0 z-50 border-b border-white/5 bg-base/80 backdrop-blur-lg">
+  <header class="sticky top-0 z-50 border-b border-[var(--border)] bg-base/80 backdrop-blur-lg">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <NuxtLink to="/" class="flex items-center gap-2 group">
         <span class="text-lg font-semibold tracking-tight group-hover:text-accent transition-colors">
@@ -8,6 +8,7 @@
       </NuxtLink>
 
       <nav class="flex items-center gap-2 sm:gap-4">
+        <UiThemeToggle />
         <NuxtLink
           v-if="profile?.username"
           v-bind="myGalleryLink"

@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     classSuffix: '',
     preference: 'dark',
     fallback: 'dark',
+    storageKey: 'loopgallery-color-mode',
   },
 
   css: ['~/assets/css/main.css'],

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="surface-card border-2 border-dashed border-white/10 p-10 text-center transition-colors"
+      class="surface-card border-2 border-dashed border-[var(--border-strong)] p-10 text-center transition-colors"
       :class="{
         'border-accent/50 bg-accent/5': dragging,
         'opacity-60 pointer-events-none': busy,
@@ -45,7 +45,7 @@
         </span>
         <span v-if="busy" class="text-accent font-medium">{{ progressLabel }}</span>
       </div>
-      <div class="h-1.5 rounded-full bg-white/10 overflow-hidden mb-4">
+      <div class="h-1.5 rounded-full bg-[var(--surface-hover)] overflow-hidden mb-4">
         <div
           class="h-full bg-accent transition-all duration-300"
           :style="{ width: `${progressPercent}%` }"
@@ -56,9 +56,9 @@
           v-for="entry in queue"
           :key="entry.id"
           class="flex items-center gap-3 text-sm rounded-xl px-2 py-1.5"
-          :class="entry.status === 'error' ? 'bg-red-500/10' : 'bg-white/[0.03]'"
+          :class="entry.status === 'error' ? 'bg-red-500/10' : 'bg-[var(--surface-muted)]'"
         >
-          <div class="w-10 h-10 rounded-lg overflow-hidden bg-black/30 shrink-0 flex items-center justify-center">
+          <div class="w-10 h-10 rounded-lg overflow-hidden bg-[var(--thumb-bg)] shrink-0 flex items-center justify-center">
             <img
               v-if="entry.previewUrl"
               :src="entry.previewUrl"

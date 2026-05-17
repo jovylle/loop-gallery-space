@@ -34,7 +34,7 @@
           />
           <div
             v-if="g.avatarUrl"
-            class="w-12 h-12 rounded-full overflow-hidden mb-3 ring-1 ring-white/10 group-hover:ring-accent/40"
+            class="w-12 h-12 rounded-full overflow-hidden mb-3 ring-1 ring-[var(--border-strong)] group-hover:ring-accent/40"
           >
             <img :src="g.avatarUrl" alt="" class="w-full h-full object-cover">
           </div>
