@@ -2,11 +2,6 @@
  * Firebase web SDK config (public). Security is enforced via Firebase
  * Authorized Domains + Google OAuth — not by hiding these values.
  *
- * Production subdomain galleries: set NUXT_PUBLIC_GALLERY_HOST (or
- * NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN) so authDomain matches the apex host.
- * Complete Firebase Authentication → Settings → Authorized domains and
- * add a custom auth domain for that host.
- *
  * @see https://firebase.google.com/docs/projects/api-keys
  */
 export const firebaseWebConfig = {

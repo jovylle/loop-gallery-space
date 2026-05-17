@@ -43,3 +43,8 @@ export function useTenantUsername() {
   const { tenantUsername } = useProfileUrl()
   return computed(() => tenantUsername())
 }
+
+/** True on `user.loopgallery.example.com` — public gallery, not the signed-in app. */
+export function useIsTenantGalleryHost() {
+  return computed(() => !!useTenantUsername().value)
+}
