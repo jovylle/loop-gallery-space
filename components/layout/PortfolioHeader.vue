@@ -9,13 +9,20 @@
 
       <div class="flex items-center gap-2 shrink-0">
         <UiThemeToggle />
-        <a
+        <UiBurgerMenu
           v-if="manageLink"
-          :href="manageLink"
-          class="btn-ghost text-sm"
+          label="Gallery menu"
         >
-          Manage
-        </a>
+          <template #default="{ close }">
+            <a
+              role="menuitem"
+              :href="manageLink"
+              @click="close"
+            >
+              Manage
+            </a>
+          </template>
+        </UiBurgerMenu>
       </div>
     </div>
   </header>

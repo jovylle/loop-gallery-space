@@ -9,6 +9,7 @@
 
       <nav class="flex items-center gap-2 sm:gap-4">
         <UiThemeToggle />
+
         <NuxtLink
           v-if="profile?.username"
           v-bind="myGalleryLink"
@@ -25,8 +26,9 @@
         >
           Dashboard
         </NuxtLink>
+
         <template v-if="isAuthenticated">
-          <button type="button" class="btn-ghost" @click="logout">
+          <button type="button" class="btn-ghost hidden sm:inline-flex" @click="logout">
             Sign out
           </button>
         </template>
@@ -34,10 +36,54 @@
           <NuxtLink to="/login" class="btn-ghost hidden sm:inline-flex">
             Sign in
           </NuxtLink>
-          <NuxtLink to="/login" class="btn-primary">
+          <NuxtLink to="/login" class="btn-primary hidden sm:inline-flex">
             Make My Own
           </NuxtLink>
         </template>
+
+        <UiBurgerMenu class="sm:hidden" label="Menu">
+          <template #default="{ close }">
+            <NuxtLink
+              v-if="profile?.username"
+              v-bind="myGalleryLink"
+              role="menuitem"
+              :aria-label="myGalleryIsExternal ? 'My gallery (opens your public portfolio)' : 'My gallery'"
+              @click="close"
+            >
+              My gallery
+              <UiExternalIcon v-if="myGalleryIsExternal" />
+            </NuxtLink>
+            <NuxtLink
+              v-if="isAuthenticated && profile?.username"
+              v-bind="manageGalleryLink"
+              role="menuitem"
+              @click="close"
+            >
+              Dashboard
+            </NuxtLink>
+            <template v-if="isAuthenticated">
+              <button type="button" role="menuitem" @click="onSignOut(close)">
+                Sign out
+              </button>
+            </template>
+            <NuxtLink
+              v-else
+              to="/login"
+              role="menuitem"
+              @click="close"
+            >
+              Sign in
+            </NuxtLink>
+          </template>
+        </UiBurgerMenu>
+
+        <NuxtLink
+          v-if="!isAuthenticated"
+          to="/login"
+          class="btn-primary sm:hidden"
+        >
+          Make My Own
+        </NuxtLink>
       </nav>
     </div>
   </header>
@@ -60,4 +106,9 @@ const myGalleryIsExternal = computed(() => {
   const url = profileUrl(profile.value.username)
   return url.startsWith('http://') || url.startsWith('https://')
 })
+
+function onSignOut(close: () => void) {
+  close()
+  logout()
+}
 </script>
