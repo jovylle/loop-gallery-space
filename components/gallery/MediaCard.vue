@@ -1,5 +1,5 @@
 <template>
-  <article class="masonry-item media-tile group" @click="$emit('open')">
+  <article class="media-tile group w-full" @click="$emit('open')">
     <video
       v-if="item.mediaType === 'video' || item.mime?.includes('video')"
       :src="item.mediaUrl"

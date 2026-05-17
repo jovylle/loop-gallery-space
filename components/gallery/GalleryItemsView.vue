@@ -29,27 +29,27 @@
 
   <div
     v-else-if="viewMode === 'list'"
-    class="space-y-2 max-w-3xl"
+    class="gallery-list mx-auto w-full max-w-md"
   >
     <button
       v-for="(item, index) in items"
       :key="item.id"
       type="button"
-      class="w-full flex gap-4 items-center surface-card p-3 text-left hover:border-accent/30 transition-colors"
+      class="gallery-list__row"
       @click="$emit('open', index)"
     >
-      <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden bg-black/30">
+      <div class="gallery-list__thumb">
         <GalleryMediaThumb :item="item" fit="cover" />
       </div>
-      <div class="min-w-0 flex-1">
-        <p class="font-medium truncate">
+      <div class="min-w-0 flex-1 text-left">
+        <p class="text-sm font-medium truncate leading-snug">
           {{ item.caption || 'Untitled' }}
         </p>
-        <p class="text-xs text-[var(--text-muted)] mt-0.5">
+        <p class="text-[11px] text-[var(--text-muted)] mt-0.5 truncate">
           {{ formatMeta(item) }}
         </p>
       </div>
-      <span class="text-[var(--text-muted)] text-lg shrink-0" aria-hidden="true">›</span>
+      <span class="text-[var(--text-muted)] text-sm shrink-0 opacity-60" aria-hidden="true">›</span>
     </button>
   </div>
 

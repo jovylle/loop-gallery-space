@@ -1,10 +1,10 @@
 <template>
-  <div :class="['masonry-grid', densityClass]">
+  <div :class="gridClass">
     <GalleryMediaCard
       v-for="(item, index) in items"
       :key="item.id"
       :item="item"
-      class="animate-fade-up"
+      class="w-full animate-fade-up"
       :style="{ animationDelay: `${Math.min(index * 40, 400)}ms` }"
       @open="$emit('open', index)"
     />
@@ -21,8 +21,15 @@ const props = defineProps<{
 
 defineEmits<{ open: [index: number] }>()
 
-const densityClass = computed(() => {
-  const d = props.density || 'normal'
-  return `masonry-grid--${d}`
+const gridClass = computed(() => {
+  const base = 'grid gap-3 sm:gap-4 w-full'
+  switch (props.density) {
+    case 'compact':
+      return `${base} grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5`
+    case 'spacious':
+      return `${base} grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto`
+    default:
+      return `${base} grid-cols-2 sm:grid-cols-3 lg:grid-cols-4`
+  }
 })
 </script>
