@@ -28,6 +28,9 @@
         </NuxtLink>
 
         <template v-if="isAuthenticated">
+          <NuxtLink to="/dashboard/settings" class="btn-ghost hidden sm:inline-flex">
+            Settings
+          </NuxtLink>
           <button type="button" class="btn-ghost hidden sm:inline-flex" @click="logout">
             Sign out
           </button>
@@ -62,6 +65,13 @@
               Dashboard
             </NuxtLink>
             <template v-if="isAuthenticated">
+              <NuxtLink
+                to="/dashboard/settings"
+                role="menuitem"
+                @click="close"
+              >
+                Settings
+              </NuxtLink>
               <button type="button" role="menuitem" @click="onSignOut(close)">
                 Sign out
               </button>
