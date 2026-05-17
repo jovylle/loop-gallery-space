@@ -1,4 +1,5 @@
 import { dicebearThumbsUrl, generateUniqueUsername } from '~/server/utils/username'
+import { randomAvatarColors } from '~/shared/avatars'
 import { toAuthUser } from '~/server/utils/user-response'
 import type { UserRecord } from '~/shared/types'
 
@@ -12,7 +13,8 @@ export default defineEventHandler(async (event) => {
 
   const db = getDb(event)
   const username = await generateUniqueUsername(db)
-  const avatarKey = dicebearThumbsUrl(user.id)
+  const colors = randomAvatarColors()
+  const avatarKey = dicebearThumbsUrl(user.id, colors)
   const displayTitle =
     body.displayName?.trim() || user.display_title || username
 

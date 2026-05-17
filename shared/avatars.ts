@@ -1,4 +1,4 @@
-/** Distinct solid backgrounds for DiceBear thumbs avatars */
+/** Circle backgrounds behind the thumb */
 export const AVATAR_BACKGROUND_COLORS = [
   'b6e3f4',
   'c0aede',
@@ -14,19 +14,35 @@ export const AVATAR_BACKGROUND_COLORS = [
   'e0c3fc',
 ] as const
 
+/** Thumb body colors (DiceBear shapeColor) */
+export const AVATAR_SHAPE_COLORS = [
+  '0a5b83',
+  '1c799f',
+  '69d2e7',
+  'f88c49',
+  'e74c3c',
+  '9b59b6',
+  '2ecc71',
+  'f39c12',
+  'e91e63',
+  '34495e',
+  '16a085',
+  'd35400',
+] as const
+
 export const AVATAR_THUMB_PRESETS = [
-  { id: 'glow-blue', seed: 'glow', backgroundColor: 'b6e3f4' },
-  { id: 'neon-lilac', seed: 'neon', backgroundColor: 'c0aede' },
-  { id: 'mood-indigo', seed: 'mood', backgroundColor: 'd1d4f9' },
-  { id: 'soft-pink', seed: 'soft', backgroundColor: 'ffd5dc' },
-  { id: 'warm-peach', seed: 'warm', backgroundColor: 'ffdfbf' },
-  { id: 'mint', seed: 'mint', backgroundColor: 'a8e6cf' },
-  { id: 'coral', seed: 'coral', backgroundColor: 'ffb4a2' },
-  { id: 'sky', seed: 'sky', backgroundColor: 'c9d6ff' },
-  { id: 'rose', seed: 'rose', backgroundColor: 'f8b4d9' },
-  { id: 'lime', seed: 'lime', backgroundColor: '84fab0' },
-  { id: 'gold', seed: 'gold', backgroundColor: 'ffeaa7' },
-  { id: 'violet', seed: 'violet', backgroundColor: 'e0c3fc' },
+  { id: 'glow-blue', seed: 'glow', backgroundColor: 'b6e3f4', shapeColor: 'f88c49' },
+  { id: 'neon-lilac', seed: 'neon', backgroundColor: 'c0aede', shapeColor: '9b59b6' },
+  { id: 'mood-indigo', seed: 'mood', backgroundColor: 'd1d4f9', shapeColor: '0a5b83' },
+  { id: 'soft-pink', seed: 'soft', backgroundColor: 'ffd5dc', shapeColor: 'e91e63' },
+  { id: 'warm-peach', seed: 'warm', backgroundColor: 'ffdfbf', shapeColor: 'd35400' },
+  { id: 'mint', seed: 'mint', backgroundColor: 'a8e6cf', shapeColor: '16a085' },
+  { id: 'coral', seed: 'coral', backgroundColor: 'ffb4a2', shapeColor: 'e74c3c' },
+  { id: 'sky', seed: 'sky', backgroundColor: 'c9d6ff', shapeColor: '1c799f' },
+  { id: 'rose', seed: 'rose', backgroundColor: 'f8b4d9', shapeColor: '9b59b6' },
+  { id: 'lime', seed: 'lime', backgroundColor: '84fab0', shapeColor: '2ecc71' },
+  { id: 'gold', seed: 'gold', backgroundColor: 'ffeaa7', shapeColor: 'f39c12' },
+  { id: 'violet', seed: 'violet', backgroundColor: 'e0c3fc', shapeColor: '34495e' },
 ] as const
 
 const DICEBEAR_THUMBS_HOST = 'https://api.dicebear.com/9.x/thumbs/png'
@@ -40,22 +56,51 @@ function hashString(value: string): number {
   return Math.abs(hash)
 }
 
+function pickFrom<T extends readonly string[]>(items: T, index: number): T[number] {
+  return items[index % items.length]!
+}
+
 export function avatarBackgroundColor(seed: string): string {
-  const index = hashString(seed) % AVATAR_BACKGROUND_COLORS.length
-  return AVATAR_BACKGROUND_COLORS[index]!
+  return pickFrom(AVATAR_BACKGROUND_COLORS, hashString(`${seed}:bg`))
+}
+
+export function avatarShapeColor(seed: string): string {
+  return pickFrom(AVATAR_SHAPE_COLORS, hashString(`${seed}:shape`))
+}
+
+/** Random palette pair for new accounts (face still derived from seed). */
+export function randomAvatarColors(): {
+  backgroundColor: string
+  shapeColor: string
+} {
+  const randomIndex = (max: number) => {
+    const buf = new Uint32Array(1)
+    crypto.getRandomValues(buf)
+    return buf[0]! % max
+  }
+  return {
+    backgroundColor: pickFrom(AVATAR_BACKGROUND_COLORS, randomIndex(AVATAR_BACKGROUND_COLORS.length)),
+    shapeColor: pickFrom(AVATAR_SHAPE_COLORS, randomIndex(AVATAR_SHAPE_COLORS.length)),
+  }
 }
 
 export function dicebearThumbsUrl(
   seed: string,
-  options: { size?: number; backgroundColor?: string } = {},
+  options: {
+    size?: number
+    backgroundColor?: string
+    shapeColor?: string
+  } = {},
 ): string {
   const size = options.size ?? 256
   const backgroundColor = options.backgroundColor ?? avatarBackgroundColor(seed)
+  const shapeColor = options.shapeColor ?? avatarShapeColor(seed)
   const params = new URLSearchParams({
     seed,
     size: String(size),
     backgroundColor,
     backgroundType: 'solid',
+    shapeColor,
   })
   return `${DICEBEAR_THUMBS_HOST}?${params}`
 }
@@ -67,6 +112,7 @@ export function avatarPresetUrl(
   return dicebearThumbsUrl(preset.seed, {
     size,
     backgroundColor: preset.backgroundColor,
+    shapeColor: preset.shapeColor,
   })
 }
 
@@ -76,6 +122,7 @@ export function avatarPresetKey(
   return dicebearThumbsUrl(preset.seed, {
     size: 256,
     backgroundColor: preset.backgroundColor,
+    shapeColor: preset.shapeColor,
   })
 }
 
@@ -85,8 +132,9 @@ export function dicebearThumbIdentity(key: string | null | undefined): string | 
     const url = new URL(key)
     const seed = url.searchParams.get('seed') ?? ''
     const backgroundColor = url.searchParams.get('backgroundColor') ?? ''
+    const shapeColor = url.searchParams.get('shapeColor') ?? ''
     if (!seed) return null
-    return `${seed}::${backgroundColor}`
+    return `${seed}::${backgroundColor}::${shapeColor}`
   }
   catch {
     return null
