@@ -23,7 +23,10 @@ export async function verifyFirebaseToken(event: H3Event): Promise<{ uid: string
 
   const token = authHeader.slice(7)
   const config = useRuntimeConfig(event)
-  const projectId = config.firebaseProjectId || config.public.firebaseProjectId
+  const projectId =
+    getWorkerEnv(event, 'FIREBASE_PROJECT_ID')
+    || config.firebaseProjectId
+    || config.public.firebaseProjectId
 
   if (!projectId) {
     throw createError({ statusCode: 500, statusMessage: 'Firebase project not configured' })

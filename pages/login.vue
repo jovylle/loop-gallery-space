@@ -15,7 +15,9 @@
       {{ signingIn ? 'Signing in…' : 'Continue with Google' }}
     </button>
     <p v-else class="text-amber-400 text-sm">
-      Firebase is not configured. Copy <code class="font-mono">.env.example</code> to <code class="font-mono">.env</code> and add your keys.
+      Firebase is not configured. Add secrets on the
+      <strong>loop-gallery-space</strong> Worker (Settings → Variables) — see
+      <code class="font-mono">.env.example</code> for names — then redeploy.
     </p>
 
     <p v-if="error" class="mt-4 text-red-400 text-sm">{{ error }}</p>
