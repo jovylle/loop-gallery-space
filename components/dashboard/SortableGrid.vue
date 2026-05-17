@@ -3,12 +3,14 @@
     v-model="localItems"
     class="grid grid-cols-2 sm:grid-cols-3 gap-3"
     :animation="200"
+    :disabled="!sortable"
     @end="onReorder"
   >
     <div
       v-for="element in localItems"
       :key="element.id"
-      class="surface-card p-2 cursor-grab active:cursor-grabbing"
+      class="surface-card p-2"
+      :class="{ 'cursor-grab active:cursor-grabbing': sortable }"
     >
       <img
         v-if="element.mediaType !== 'video'"
@@ -46,7 +48,10 @@
 import { VueDraggable } from 'vue-draggable-plus'
 import type { PublicGalleryItem } from '~/shared/types'
 
-const props = defineProps<{ items: PublicGalleryItem[] }>()
+const props = withDefaults(
+  defineProps<{ items: PublicGalleryItem[]; sortable?: boolean }>(),
+  { sortable: true },
+)
 const emit = defineEmits<{ reorder: [ids: string[]]; delete: [id: string]; 'caption-updated': [] }>()
 
 const { apiFetch } = useAuth()
@@ -65,6 +70,7 @@ watch(
 )
 
 function onReorder() {
+  if (!props.sortable) return
   emit(
     'reorder',
     localItems.value.map(i => i.id),

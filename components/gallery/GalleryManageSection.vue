@@ -19,10 +19,11 @@
     <section v-if="items?.length" class="mb-8">
       <h2 class="text-lg font-medium mb-1">Organize</h2>
       <p class="text-sm text-[var(--text-muted)] mb-4">
-        Drag to reorder · edit captions · delete items
+        Edit captions · delete items
       </p>
       <DashboardSortableGrid
         :items="items"
+        :sortable="false"
         @reorder="onReorder"
         @delete="onDelete"
         @caption-updated="refreshItems"
