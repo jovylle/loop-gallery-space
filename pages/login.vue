@@ -12,7 +12,7 @@
       :disabled="loading || signingIn"
       @click="handleSignIn"
     >
-      {{ signingIn ? 'Signing in…' : 'Continue with Google' }}
+      {{ signingIn ? 'Setting up your space…' : 'Continue with Google' }}
     </button>
     <p v-else class="text-amber-400 text-sm">
       Firebase is not configured. Add secrets on the
@@ -34,13 +34,9 @@ const error = ref('')
 watch(
   [user, profile, loading],
   () => {
-    if (loading.value || !user.value) return
-    if (profile.value?.needsOnboarding) {
-      navigateTo('/dashboard/settings')
-    }
-    else if (profile.value?.username) {
-      navigateTo('/dashboard')
-    }
+    if (loading.value || !user.value || !profile.value?.username) return
+    if (profile.value.needsOnboarding) return
+    navigateTo(`/${profile.value.username}`)
   },
   { immediate: true },
 )
@@ -50,6 +46,9 @@ async function handleSignIn() {
   signingIn.value = true
   try {
     await signInWithGoogle()
+    if (profile.value?.username) {
+      await navigateTo(`/${profile.value.username}`)
+    }
   }
   catch (e) {
     error.value = e instanceof Error ? e.message : 'Sign in failed'

@@ -41,12 +41,24 @@ export function useAuth() {
     }
   }
 
+  async function completeOnboarding() {
+    const displayName = user.value?.displayName || undefined
+    profile.value = await apiFetch<AuthUser>('/api/onboarding/setup', {
+      method: 'POST',
+      body: { displayName },
+    })
+    return profile.value
+  }
+
   async function signInWithGoogle() {
     if (!$firebaseAuth || !$googleProvider) {
       throw new Error('Firebase not configured')
     }
     await signInWithPopup($firebaseAuth, $googleProvider)
     await refreshProfile()
+    if (profile.value?.needsOnboarding) {
+      await completeOnboarding()
+    }
   }
 
   async function logout() {
@@ -63,8 +75,15 @@ export function useAuth() {
     }
     onAuthStateChanged($firebaseAuth, async (u) => {
       user.value = u
-      if (u) await refreshProfile()
-      else profile.value = null
+      if (u) {
+        await refreshProfile()
+        if (profile.value?.needsOnboarding) {
+          await completeOnboarding()
+        }
+      }
+      else {
+        profile.value = null
+      }
       loading.value = false
     })
   }
@@ -74,6 +93,7 @@ export function useAuth() {
     profile,
     loading,
     signInWithGoogle,
+    completeOnboarding,
     logout,
     refreshProfile,
     getIdToken,

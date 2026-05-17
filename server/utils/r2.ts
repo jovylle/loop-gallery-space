@@ -16,6 +16,7 @@ export function getMediaBucket(event: H3Event): R2Bucket {
 
 export function mediaUrl(key: string | null | undefined): string | null {
   if (!key) return null
+  if (key.startsWith('https://') || key.startsWith('http://')) return key
   const config = useRuntimeConfig()
   const base = config.public.mediaBaseUrl?.replace(/\/$/, '')
   if (base) return `${base}/${key}`

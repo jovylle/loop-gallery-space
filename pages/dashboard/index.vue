@@ -5,11 +5,8 @@
       Manage your visual space
     </p>
 
-    <div v-if="profile?.needsOnboarding" class="surface-card p-6 mb-8 border-accent/30">
-      <p class="mb-4">Pick a username to publish your gallery.</p>
-      <NuxtLink to="/dashboard/settings" class="btn-primary">
-        Complete setup
-      </NuxtLink>
+    <div v-if="profile?.needsOnboarding" class="surface-card p-6 mb-8 border-accent/30 text-[var(--text-muted)]">
+      Setting up your gallery…
     </div>
 
     <div class="grid sm:grid-cols-2 gap-4">
