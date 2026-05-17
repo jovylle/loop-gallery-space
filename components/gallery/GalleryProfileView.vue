@@ -8,12 +8,25 @@
     <NuxtLink :to="homeUrl" class="btn-primary">Back home</NuxtLink>
   </div>
   <div v-else-if="profile">
+    <div
+      v-if="showManageBanner"
+      class="surface-card p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3 border-accent/20"
+    >
+      <div class="min-w-0 flex-1">
+        <p class="text-xs font-mono uppercase tracking-wider text-accent mb-1">Public portfolio link</p>
+        <p class="text-sm font-mono break-all text-[var(--text-muted)]">{{ publicShareUrl }}</p>
+      </div>
+      <button type="button" class="btn-primary shrink-0 text-sm" @click="copyShareUrl">
+        {{ shareCopied ? 'Copied' : 'Copy link' }}
+      </button>
+    </div>
     <GalleryProfileHeader
       :username="profile.username"
       :display-title="profile.displayTitle"
       :bio="profile.bio"
       :avatar-url="profile.avatarUrl"
       :links="profile.links"
+      :portfolio="isPortfolio"
     />
     <template v-if="profile.items.length">
       <GalleryViewToolbar
@@ -47,8 +60,13 @@ const props = defineProps<{
   username: string
 }>()
 
-const { appUrl } = useProfileUrl()
-const homeUrl = computed(() => appUrl('/'))
+const route = useRoute()
+const isPortfolio = useIsTenantGalleryHost()
+const { appUrl, profileUrl } = useProfileUrl()
+const showManageBanner = computed(() => !isPortfolio.value && route.query.manage === '1')
+const publicShareUrl = computed(() => profileUrl(username.value))
+const shareCopied = ref(false)
+const homeUrl = computed(() => (isPortfolio.value ? '/' : appUrl('/')))
 
 const username = computed(() => props.username.toLowerCase())
 const { fetchProfile } = useGallery()
@@ -70,6 +88,18 @@ useSeoMeta({
 
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
+
+async function copyShareUrl() {
+  if (!publicShareUrl.value) return
+  try {
+    await navigator.clipboard.writeText(publicShareUrl.value)
+    shareCopied.value = true
+    setTimeout(() => { shareCopied.value = false }, 2000)
+  }
+  catch {
+    // ignore
+  }
+}
 
 function openLightbox(index: number) {
   lightboxIndex.value = index

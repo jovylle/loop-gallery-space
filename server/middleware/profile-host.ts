@@ -21,7 +21,7 @@ export default defineEventHandler((event) => {
 
   if (hostname === galleryHost.toLowerCase()) {
     const match = url.pathname.match(/^\/([a-z0-9_]{3,24})\/?$/)
-    if (match && isValidPublicUsername(match[1]!)) {
+    if (match && isValidPublicUsername(match[1]!) && !url.searchParams.has('manage')) {
       return sendRedirect(
         event,
         profilePublicUrl(match[1]!, galleryHost, siteUrl),

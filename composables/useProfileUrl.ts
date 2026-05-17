@@ -19,6 +19,12 @@ export function useProfileUrl() {
     return galleryAppUrl(galleryHost.value, siteUrl.value, path)
   }
 
+  /** Apex profile path with app chrome (skips subdomain redirect). */
+  function manageProfileUrl(username: string): string {
+    const u = username.toLowerCase()
+    return appUrl(`/${u}?manage=1`)
+  }
+
   function tenantUsername(hostname?: string): string | null {
     const host =
       hostname
@@ -35,6 +41,7 @@ export function useProfileUrl() {
     galleryHost,
     profileUrl,
     appUrl,
+    manageProfileUrl,
     tenantUsername,
   }
 }

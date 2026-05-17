@@ -50,6 +50,11 @@
 
 <script setup lang="ts">
 const tenantUsername = useTenantUsername()
+
+if (tenantUsername.value) {
+  setPageLayout('portfolio')
+}
+
 const { profileUrl } = useProfileUrl()
 
 const appConfig = useAppConfig()

@@ -8,34 +8,24 @@
       </NuxtLink>
 
       <nav class="flex items-center gap-2 sm:gap-4">
-        <template v-if="isVisitorGallery">
-          <a :href="appUrl('/login')" class="btn-ghost hidden sm:inline-flex">
-            Sign in
-          </a>
-          <a :href="appUrl('/login')" class="btn-primary">
-            Make My Own
-          </a>
+        <NuxtLink v-if="profile?.username" :to="profileUrl(profile.username)" class="btn-ghost hidden sm:inline-flex">
+          My gallery
+        </NuxtLink>
+        <NuxtLink v-if="isAuthenticated" to="/dashboard" class="btn-ghost hidden sm:inline-flex">
+          Dashboard
+        </NuxtLink>
+        <template v-if="isAuthenticated">
+          <button type="button" class="btn-ghost" @click="logout">
+            Sign out
+          </button>
         </template>
         <template v-else>
-          <NuxtLink v-if="profile?.username" :to="profileUrl(profile.username)" class="btn-ghost hidden sm:inline-flex">
-            My gallery
+          <NuxtLink to="/login" class="btn-ghost hidden sm:inline-flex">
+            Sign in
           </NuxtLink>
-          <NuxtLink v-if="isAuthenticated" to="/dashboard" class="btn-ghost hidden sm:inline-flex">
-            Dashboard
+          <NuxtLink to="/login" class="btn-primary">
+            Make My Own
           </NuxtLink>
-          <template v-if="isAuthenticated">
-            <button type="button" class="btn-ghost" @click="logout">
-              Sign out
-            </button>
-          </template>
-          <template v-else>
-            <NuxtLink to="/login" class="btn-ghost hidden sm:inline-flex">
-              Sign in
-            </NuxtLink>
-            <NuxtLink to="/login" class="btn-primary">
-              Make My Own
-            </NuxtLink>
-          </template>
         </template>
       </nav>
     </div>
@@ -43,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-const isVisitorGallery = useIsTenantGalleryHost()
 const { profile, logout, isAuthenticated } = useAuth()
-const { profileUrl, appUrl } = useProfileUrl()
+const { profileUrl } = useProfileUrl()
 </script>
