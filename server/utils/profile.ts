@@ -21,6 +21,8 @@ export function mapItem(row: GalleryItemRecord): PublicGalleryItem {
     height: row.height,
     caption: row.caption,
     tags: parseJson<string[]>(row.tags_json, []),
+    sortOrder: row.sort_order,
+    createdAt: row.created_at,
   }
 }
 

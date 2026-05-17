@@ -102,4 +102,12 @@ body {
     break-inside: avoid;
     margin-bottom: 1rem;
   }
+
+  .gallery-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3;
+  }
+
+  .gallery-grid__cell {
+    @apply relative aspect-square overflow-hidden rounded-xl p-0 border-0;
+  }
 }

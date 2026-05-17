@@ -103,5 +103,55 @@ export function useUpload() {
     return item
   }
 
-  return { uploadFile, compressImage }
+  type UploadManyOptions = {
+    kind?: 'item' | 'avatar'
+    concurrency?: number
+    onFileStart?: (file: File) => void
+    onFileComplete?: (file: File, error?: Error) => void
+  }
+
+  type UploadManyResult = {
+    succeeded: number
+    failed: number
+    errors: { file: File; message: string }[]
+  }
+
+  async function uploadMany(
+    files: File[],
+    options: UploadManyOptions = {},
+  ): Promise<UploadManyResult> {
+    const concurrency = Math.max(1, options.concurrency ?? 3)
+    const queue = [...files]
+    let succeeded = 0
+    let failed = 0
+    const errors: { file: File; message: string }[] = []
+
+    async function worker() {
+      while (queue.length > 0) {
+        const file = queue.shift()!
+        options.onFileStart?.(file)
+        try {
+          await uploadFile(file, { kind: options.kind })
+          succeeded++
+          options.onFileComplete?.(file)
+        }
+        catch (e) {
+          const message = e instanceof Error ? e.message : 'Upload failed'
+          failed++
+          errors.push({ file, message })
+          options.onFileComplete?.(file, e instanceof Error ? e : new Error(message))
+        }
+      }
+    }
+
+    const workers = Array.from(
+      { length: Math.min(concurrency, files.length) },
+      () => worker(),
+    )
+    await Promise.all(workers)
+
+    return { succeeded, failed, errors }
+  }
+
+  return { uploadFile, uploadMany, compressImage }
 }

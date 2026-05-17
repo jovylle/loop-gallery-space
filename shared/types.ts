@@ -58,6 +58,8 @@ export interface PublicGalleryItem {
   height: number | null
   caption: string | null
   tags: string[]
+  sortOrder: number
+  createdAt: string
 }
 
 export interface AuthUser {
