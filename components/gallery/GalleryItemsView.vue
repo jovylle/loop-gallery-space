@@ -1,13 +1,6 @@
 <template>
-  <GalleryMasonryGrid
-    v-if="viewMode === 'masonry'"
-    :items="items"
-    :density="density"
-    @open="$emit('open', $event)"
-  />
-
   <div
-    v-else-if="viewMode === 'grid'"
+    v-if="viewMode === 'grid'"
     class="gallery-grid"
   >
     <button
@@ -74,12 +67,11 @@
 
 <script setup lang="ts">
 import type { GalleryViewMode } from '~/shared/gallery-view'
-import type { PublicGalleryItem, UserTheme } from '~/shared/types'
+import type { PublicGalleryItem } from '~/shared/types'
 
 defineProps<{
   items: PublicGalleryItem[]
   viewMode: GalleryViewMode
-  density?: UserTheme['density']
 }>()
 
 defineEmits<{ open: [index: number] }>()

@@ -38,7 +38,6 @@
       <GalleryItemsView
         :items="displayItems"
         :view-mode="viewMode"
-        :density="profile.theme.density"
         @open="openLightbox"
       />
     </template>

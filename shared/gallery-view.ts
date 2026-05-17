@@ -1,6 +1,6 @@
 import type { PublicGalleryItem } from './types'
 
-export type GalleryViewMode = 'masonry' | 'grid' | 'list' | 'feed'
+export type GalleryViewMode = 'grid' | 'list' | 'feed'
 
 export type GallerySortMode =
   | 'order'
@@ -10,7 +10,6 @@ export type GallerySortMode =
   | 'caption-desc'
 
 export const GALLERY_VIEW_MODES: { id: GalleryViewMode; label: string }[] = [
-  { id: 'masonry', label: 'Masonry' },
   { id: 'grid', label: 'Grid' },
   { id: 'list', label: 'List' },
   { id: 'feed', label: 'Feed' },
