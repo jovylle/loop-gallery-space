@@ -10,6 +10,7 @@ export function toAuthUser(user: UserRecord): AuthUser {
     displayTitle: user.display_title,
     bio: user.bio,
     avatarUrl: mediaUrl(user.avatar_key),
+    avatarKey: user.avatar_key,
     isPublic: user.is_public === 1,
     storageBytes: user.storage_bytes,
     needsOnboarding: !user.username,

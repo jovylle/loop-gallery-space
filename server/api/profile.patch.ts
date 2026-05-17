@@ -1,3 +1,4 @@
+import { isValidAvatarKey } from '~/server/utils/avatar'
 import { RESERVED_USERNAMES, USERNAME_REGEX } from '~/shared/constants'
 import type { UserLink, UserTheme } from '~/shared/types'
 
@@ -57,8 +58,12 @@ export default defineEventHandler(async (event) => {
     values.push(body.isPublic ? 1 : 0)
   }
   if (body.avatarKey !== undefined) {
+    const avatarKey = body.avatarKey.trim()
+    if (!isValidAvatarKey(avatarKey, user.id)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid avatar' })
+    }
     updates.push('avatar_key = ?')
-    values.push(body.avatarKey)
+    values.push(avatarKey)
   }
 
   if (updates.length) {

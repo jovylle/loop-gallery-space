@@ -4,9 +4,7 @@ import { RESERVED_USERNAMES, USERNAME_REGEX } from '~/shared/constants'
 const PARTS_A = ['pixel', 'loop', 'mood', 'soft', 'neon', 'glow', 'arc', 'byte', 'haze', 'vibe']
 const PARTS_B = ['cat', 'fox', 'owl', 'bay', 'kit', 'ray', 'zip', 'orb', 'jam', 'pop']
 
-export function dicebearThumbsUrl(seed: string, size = 256): string {
-  return `https://api.dicebear.com/9.x/thumbs/png?seed=${encodeURIComponent(seed)}&size=${size}`
-}
+export { dicebearThumbsUrl } from '~/shared/avatars'
 
 function randomSlug(): string {
   const a = PARTS_A[Math.floor(Math.random() * PARTS_A.length)]!

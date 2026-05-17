@@ -79,6 +79,7 @@ export interface AuthUser {
   displayTitle: string | null
   bio: string | null
   avatarUrl: string | null
+  avatarKey: string | null
   isPublic: boolean
   storageBytes: number
   needsOnboarding: boolean
