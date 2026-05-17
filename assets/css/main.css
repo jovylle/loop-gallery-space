@@ -3,23 +3,6 @@
 @tailwind utilities;
 
 :root,
-html.dark {
-  --bg-base: #0a0a0f;
-  --bg-elevated: #12121a;
-  --text-primary: #f4f4f8;
-  --text-muted: #9898a8;
-  --accent: #a78bfa;
-  --accent-dim: #7c5cbf;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.1);
-  --surface-hover: rgba(255, 255, 255, 0.05);
-  --surface-muted: rgba(255, 255, 255, 0.03);
-  --input-bg: rgba(0, 0, 0, 0.3);
-  --input-border: rgba(255, 255, 255, 0.1);
-  --thumb-bg: rgba(0, 0, 0, 0.3);
-  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
 html.light {
   --bg-base: #f6f6fa;
   --bg-elevated: #ffffff;
@@ -35,6 +18,23 @@ html.light {
   --input-border: rgba(0, 0, 0, 0.12);
   --thumb-bg: rgba(0, 0, 0, 0.06);
   --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+html.dark {
+  --bg-base: #0a0a0f;
+  --bg-elevated: #12121a;
+  --text-primary: #f4f4f8;
+  --text-muted: #9898a8;
+  --accent: #a78bfa;
+  --accent-dim: #7c5cbf;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  --surface-muted: rgba(255, 255, 255, 0.03);
+  --input-bg: rgba(0, 0, 0, 0.3);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --thumb-bg: rgba(0, 0, 0, 0.3);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 html {
