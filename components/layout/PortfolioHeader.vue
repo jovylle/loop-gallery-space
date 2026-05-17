@@ -10,17 +10,18 @@
       <div class="flex items-center gap-2 shrink-0">
         <UiThemeToggle />
         <!--
-          Manage is tucked in the menu (not shown as a header button) and only for the
-          signed-in gallery owner — public visitors must not see an edit affordance here.
+          Burger menu is always on public portfolios. "Manage" is tucked here (not a header
+          button) and links to apex `/{tenant}?manage=1`. Firebase auth is per-origin, so we
+          cannot gate this link on sign-in on the tenant subdomain — owner checks run there.
         -->
         <UiBurgerMenu
-          v-if="ownerManageLink"
+          v-if="tenant"
           label="Gallery menu"
         >
           <template #default="{ close }">
             <a
               role="menuitem"
-              :href="ownerManageLink"
+              :href="manageLink"
               @click="close"
             >
               Manage
@@ -34,13 +35,12 @@
 
 <script setup lang="ts">
 /**
- * Portfolio layout header (tenant subdomain, e.g. user.loopgallery.com).
- * Public visitors see theme toggle only. Signed-in owners get a menu "Manage" link
- * to the apex dashboard (`/{username}?manage=1`); everyone else gets nothing.
+ * Portfolio layout header (tenant subdomain, e.g. jovylle.loopgallery.example.com).
+ * Always shows a burger with "Manage" → apex `/{tenant}?manage=1`. Edit access is enforced
+ * on the apex app (login + owner redirect), not here — auth does not carry across origins.
  */
 const tenant = useTenantUsername()
 const { manageProfileUrl } = useProfileUrl()
-const { profile: authProfile, isAuthenticated } = useAuth()
 
 const { data: profile } = useTenantProfile(tenant)
 
@@ -51,9 +51,7 @@ const siteTitle = computed(() => {
   return 'Gallery'
 })
 
-const ownerManageLink = computed(() => {
-  if (!tenant.value || !isAuthenticated.value) return ''
-  if (authProfile.value?.username?.toLowerCase() !== tenant.value.toLowerCase()) return ''
-  return manageProfileUrl(tenant.value)
-})
+const manageLink = computed(() =>
+  tenant.value ? manageProfileUrl(tenant.value) : '',
+)
 </script>
