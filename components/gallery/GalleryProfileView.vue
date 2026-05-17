@@ -14,6 +14,14 @@
       :username="username"
       class="mb-6"
     />
+
+    <GalleryManageSection
+      v-if="showManageTools"
+      :username="username"
+      :storage-bytes="authProfile?.storageBytes"
+      @refreshed="onManageRefreshed"
+    />
+
     <GalleryProfileHeader
       :username="profile.username"
       :display-title="profile.displayTitle"
@@ -22,7 +30,7 @@
       :links="profile.links"
       :portfolio="isPortfolio"
     />
-    <template v-if="profile.items.length">
+    <template v-if="displayItems.length">
       <GalleryViewToolbar
         v-model:view-mode="viewMode"
         v-model:sort-mode="sortMode"
@@ -35,7 +43,7 @@
         @open="openLightbox"
       />
     </template>
-    <p v-else class="text-center text-[var(--text-muted)] py-16">
+    <p v-else-if="!showManageTools" class="text-center text-[var(--text-muted)] py-16">
       No items yet.
     </p>
     <GalleryLightboxModal
@@ -57,18 +65,42 @@ const props = defineProps<{
 const route = useRoute()
 const isPortfolio = useIsTenantGalleryHost()
 const { appUrl, profileUrl } = useProfileUrl()
-const showManageBanner = computed(() => !isPortfolio.value && route.query.manage === '1')
+const { profile: authProfile, loading: authLoading, isAuthenticated } = useAuth()
+
+const isManageMode = computed(() => route.query.manage === '1')
+const showManageBanner = computed(() => !isPortfolio.value && isManageMode.value)
+const isOwner = computed(
+  () =>
+    isAuthenticated.value
+    && authProfile.value?.username?.toLowerCase() === username.value,
+)
+const showManageTools = computed(() => isManageMode.value && isOwner.value)
 const publicShareUrl = computed(() => profileUrl(username.value))
 const homeUrl = computed(() => (isPortfolio.value ? '/' : appUrl('/')))
 
 const username = computed(() => props.username.toLowerCase())
 const { viewMode, sortMode, sortedItems } = useGalleryView()
 
-const { data: profile, pending, error } = useTenantProfile(username)
+const { data: profile, pending, error, refresh: refreshProfile } = useTenantProfile(username)
 
 const displayItems = computed(() =>
   profile.value ? sortedItems(profile.value.items) : [],
 )
+
+watch(
+  [isManageMode, authLoading, isAuthenticated],
+  () => {
+    if (!import.meta.client || !isManageMode.value || authLoading.value) return
+    if (!isAuthenticated.value) {
+      navigateTo(`/login?next=${encodeURIComponent(route.fullPath)}`)
+    }
+  },
+  { immediate: true },
+)
+
+async function onManageRefreshed() {
+  await refreshProfile()
+}
 
 useSeoMeta({
   title: () => profile.value?.displayTitle || profile.value?.username || 'Gallery',

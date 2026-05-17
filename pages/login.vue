@@ -26,16 +26,29 @@
 definePageMeta({ layout: 'default' })
 
 const { signInWithGoogle, user, profile, loading, isConfigured } = useAuth()
-const { navigateToProfile } = useProfileUrl()
+const route = useRoute()
+const { navigateToManageProfile, navigateToHref } = useProfileUrl()
 const signingIn = ref(false)
 const error = ref('')
+
+function goAfterLogin() {
+  if (!profile.value?.username) return
+  const next = route.query.next
+  if (typeof next === 'string' && next.length > 0) {
+    if (/^https?:\/\//i.test(next)) {
+      return navigateTo(next, { external: true })
+    }
+    return navigateToHref(next.startsWith('/') ? next : `/${next}`)
+  }
+  return navigateToManageProfile(profile.value.username)
+}
 
 watch(
   [user, profile, loading],
   () => {
     if (loading.value || !user.value || !profile.value?.username) return
     if (profile.value.needsOnboarding) return
-    navigateToProfile(profile.value.username)
+    goAfterLogin()
   },
   { immediate: true },
 )
@@ -46,7 +59,7 @@ async function handleSignIn() {
   try {
     await signInWithGoogle()
     if (profile.value?.username) {
-      await navigateToProfile(profile.value.username)
+      await goAfterLogin()
     }
   }
   catch (e) {

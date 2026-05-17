@@ -6,7 +6,13 @@
     <template v-else>
       <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-semibold">Settings</h1>
-        <NuxtLink to="/dashboard" class="btn-ghost">← Back</NuxtLink>
+        <NuxtLink
+          v-if="profile?.username"
+          v-bind="manageGalleryLink"
+          class="btn-ghost"
+        >
+          ← Back
+        </NuxtLink>
       </div>
 
       <div v-if="profile" class="space-y-8">
@@ -38,7 +44,11 @@
 definePageMeta({ middleware: 'auth' })
 
 const { profile, refreshProfile, completeOnboarding } = useAuth()
-const { navigateToProfile } = useProfileUrl()
+const { navigateToManageProfile, manageProfileUrl, linkTo } = useProfileUrl()
+
+const manageGalleryLink = computed(() =>
+  profile.value?.username ? linkTo(manageProfileUrl(profile.value.username)) : {},
+)
 const { uploadFile } = useUpload()
 
 const avatarInput = ref<HTMLInputElement>()
@@ -51,7 +61,7 @@ onMounted(async () => {
   try {
     await completeOnboarding()
     if (profile.value?.username) {
-      await navigateToProfile(profile.value.username)
+      await navigateToManageProfile(profile.value.username)
     }
   }
   finally {
@@ -75,7 +85,7 @@ async function onAvatar(e: Event) {
 async function onSaved() {
   await refreshProfile()
   if (profile.value?.username) {
-    await navigateToProfile(profile.value.username)
+    await navigateToManageProfile(profile.value.username)
   }
 }
 </script>

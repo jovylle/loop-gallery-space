@@ -58,6 +58,10 @@ export function useProfileUrl() {
     return navigateToHref(profileUrl(username, path))
   }
 
+  function navigateToManageProfile(username: string) {
+    return navigateToHref(manageProfileUrl(username))
+  }
+
   /** Props for NuxtLink when `to` may be a full https URL. */
   function linkTo(url: string) {
     return isAbsoluteUrl(url) ? { to: url, external: true as const } : { to: url }
@@ -103,6 +107,7 @@ export function useProfileUrl() {
     manageProfileUrl,
     navigateToHref,
     navigateToProfile,
+    navigateToManageProfile,
     linkTo,
     profileLink,
     profileLinkNewTab,

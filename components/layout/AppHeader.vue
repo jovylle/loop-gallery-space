@@ -18,7 +18,11 @@
           My gallery
           <UiExternalIcon v-if="myGalleryIsExternal" />
         </NuxtLink>
-        <NuxtLink v-if="isAuthenticated" to="/dashboard" class="btn-ghost hidden sm:inline-flex">
+        <NuxtLink
+          v-if="isAuthenticated && profile?.username"
+          v-bind="manageGalleryLink"
+          class="btn-ghost hidden sm:inline-flex"
+        >
           Dashboard
         </NuxtLink>
         <template v-if="isAuthenticated">
@@ -41,10 +45,14 @@
 
 <script setup lang="ts">
 const { profile, logout, isAuthenticated } = useAuth()
-const { profileLink, profileUrl } = useProfileUrl()
+const { profileLink, profileUrl, manageProfileUrl, linkTo } = useProfileUrl()
 
 const myGalleryLink = computed(() =>
   profile.value?.username ? profileLink(profile.value.username) : {},
+)
+
+const manageGalleryLink = computed(() =>
+  profile.value?.username ? linkTo(manageProfileUrl(profile.value.username)) : {},
 )
 
 const myGalleryIsExternal = computed(() => {
