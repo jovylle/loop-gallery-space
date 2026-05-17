@@ -11,10 +11,10 @@
         <NuxtLink v-if="profile?.username" :to="profileUrl(profile.username)" class="btn-ghost hidden sm:inline-flex">
           My gallery
         </NuxtLink>
-        <NuxtLink v-if="user" to="/dashboard" class="btn-ghost hidden sm:inline-flex">
+        <NuxtLink v-if="isAuthenticated" to="/dashboard" class="btn-ghost hidden sm:inline-flex">
           Dashboard
         </NuxtLink>
-        <template v-if="user">
+        <template v-if="isAuthenticated">
           <button type="button" class="btn-ghost" @click="logout">
             Sign out
           </button>
@@ -33,6 +33,6 @@
 </template>
 
 <script setup lang="ts">
-const { user, profile, logout } = useAuth()
+const { profile, logout, isAuthenticated } = useAuth()
 const { profileUrl } = useProfileUrl()
 </script>

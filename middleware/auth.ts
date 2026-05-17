@@ -1,5 +1,5 @@
 export default defineNuxtRouteMiddleware(async () => {
-  const { user, loading, initAuthListener } = useAuth()
+  const { loading, initAuthListener, isAuthenticated } = useAuth()
 
   if (import.meta.client && loading.value) {
     initAuthListener()
@@ -13,7 +13,7 @@ export default defineNuxtRouteMiddleware(async () => {
     })
   }
 
-  if (!user.value) {
+  if (!isAuthenticated.value) {
     return navigateTo('/login')
   }
 })

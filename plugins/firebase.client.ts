@@ -6,6 +6,9 @@ let app: FirebaseApp | null = null
 let auth: Auth | null = null
 
 export default defineNuxtPlugin(() => {
+  const config = useRuntimeConfig()
+  const authDomain = String(config.public.firebaseAuthDomain || firebaseWebConfig.authDomain)
+
   if (!firebaseWebConfig.apiKey) {
     console.warn('[LoopGallery] Firebase API key missing in shared/firebase.config.ts')
     return {
@@ -19,7 +22,7 @@ export default defineNuxtPlugin(() => {
   if (!getApps().length) {
     app = initializeApp({
       apiKey: firebaseWebConfig.apiKey,
-      authDomain: firebaseWebConfig.authDomain,
+      authDomain,
       projectId: firebaseWebConfig.projectId,
       appId: firebaseWebConfig.appId,
     })

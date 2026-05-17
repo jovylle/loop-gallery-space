@@ -1,5 +1,8 @@
 import { firebaseWebConfig } from './shared/firebase.config'
 
+const firebaseAuthDomain =
+  process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || firebaseWebConfig.authDomain
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-04-01',
   devtools: { enabled: true },
@@ -37,7 +40,7 @@ export default defineNuxtConfig({
     r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
     public: {
       firebaseApiKey: firebaseWebConfig.apiKey,
-      firebaseAuthDomain: firebaseWebConfig.authDomain,
+      firebaseAuthDomain,
       firebaseProjectId: firebaseWebConfig.projectId,
       firebaseAppId: firebaseWebConfig.appId,
       mediaBaseUrl: process.env.NUXT_PUBLIC_MEDIA_BASE_URL || '',

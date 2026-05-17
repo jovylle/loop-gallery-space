@@ -29,6 +29,13 @@ export function galleryAppUrl(galleryHost: string, siteUrl: string, path = '/'):
   return `${proto}://${galleryHost}${suffix}`
 }
 
+/** Cookie Domain for shared auth across apex + `*.galleryHost` tenants. */
+export function sessionCookieDomain(galleryHost: string): string | undefined {
+  const base = galleryHost.trim().toLowerCase()
+  if (!base) return undefined
+  return `.${base}`
+}
+
 export function profilePublicUrl(
   username: string,
   galleryHost: string,
