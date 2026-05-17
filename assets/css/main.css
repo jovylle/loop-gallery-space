@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #0a0a0f;
+  --bg-elevated: #12121a;
+  --text-primary: #f4f4f8;
+  --text-muted: #9898a8;
+  --accent: #a78bfa;
+  --accent-dim: #7c5cbf;
+  --border: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+html {
+  @apply antialiased scroll-smooth;
+}
+
+body {
+  @apply text-[var(--text-primary)] font-sans min-h-screen;
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, color-mix(in srgb, var(--accent-dim) 8%, transparent), transparent);
+}
+
+@layer components {
+  .surface-card {
+    @apply backdrop-blur-md rounded-2xl border border-white/5 shadow-soft;
+    background-color: color-mix(in srgb, var(--bg-elevated) 80%, transparent);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full
+      text-white font-medium text-sm
+      hover:brightness-110 active:scale-[0.98] transition-all duration-200 shadow-glow;
+    background-color: var(--accent);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full
+      text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5
+      transition-colors duration-200 text-sm;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl bg-black/30 border border-white/10
+      text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
+      focus:outline-none transition;
+  }
+
+  .input-field:focus {
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  .media-tile {
+    @apply relative overflow-hidden rounded-xl
+      bg-[color-mix(in_srgb,var(--bg-elevated)_50%,transparent)]
+      transition-transform duration-300 ease-out
+      hover:scale-[1.02] hover:shadow-glow cursor-pointer;
+  }
+
+  .masonry-grid {
+    column-gap: 1rem;
+  }
+
+  .masonry-grid--compact {
+    column-count: 2;
+  }
+
+  @media (min-width: 640px) {
+    .masonry-grid--compact { column-count: 3; }
+  }
+
+  .masonry-grid--normal {
+    column-count: 2;
+  }
+
+  @media (min-width: 640px) {
+    .masonry-grid--normal { column-count: 3; }
+  }
+
+  @media (min-width: 1024px) {
+    .masonry-grid--normal { column-count: 4; }
+  }
+
+  .masonry-grid--spacious {
+    column-count: 1;
+  }
+
+  @media (min-width: 640px) {
+    .masonry-grid--spacious { column-count: 2; }
+  }
+
+  @media (min-width: 1024px) {
+    .masonry-grid--spacious { column-count: 3; }
+  }
+
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+}
