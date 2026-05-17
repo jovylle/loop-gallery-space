@@ -1,14 +1,38 @@
 import {
   galleryAppUrl,
+  parseTenantGalleryHost,
   profilePublicUrl,
   tenantUsernameFromHost,
 } from '~/shared/host'
 
+function requestHostname(): string | undefined {
+  if (import.meta.server) {
+    return useRequestHeaders(['host']).host?.split(':')[0]
+  }
+  if (import.meta.client) {
+    return window.location.hostname
+  }
+  return undefined
+}
+
 export function useProfileUrl() {
   const config = useRuntimeConfig()
 
-  const galleryHost = computed(() => String(config.public.galleryHost || ''))
-  const siteUrl = computed(() => String(config.public.siteUrl || ''))
+  const inferred = computed(() => {
+    const host = requestHostname()
+    return host ? parseTenantGalleryHost(host) : null
+  })
+
+  const galleryHost = computed(
+    () => String(config.public.galleryHost || '') || inferred.value?.galleryHost || '',
+  )
+
+  const siteUrl = computed(() => {
+    const configured = String(config.public.siteUrl || '')
+    if (configured && configured !== 'http://localhost:3000') return configured
+    if (galleryHost.value) return `https://${galleryHost.value}`
+    return configured || 'http://localhost:3000'
+  })
 
   function profileUrl(username: string, path = '/'): string {
     return profilePublicUrl(username, galleryHost.value, siteUrl.value, path)
@@ -26,15 +50,14 @@ export function useProfileUrl() {
   }
 
   function tenantUsername(hostname?: string): string | null {
-    const host =
-      hostname
-      ?? (import.meta.server
-        ? useRequestHeaders(['host']).host
-        : import.meta.client
-          ? window.location.hostname
-          : undefined)
-    if (!host || !galleryHost.value) return null
-    return tenantUsernameFromHost(host.split(':')[0]!, galleryHost.value)
+    const host = (hostname ?? requestHostname())?.split(':')[0]
+    if (!host) return null
+
+    if (galleryHost.value) {
+      return tenantUsernameFromHost(host, galleryHost.value)
+    }
+
+    return parseTenantGalleryHost(host)?.tenant ?? null
   }
 
   return {

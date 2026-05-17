@@ -5,6 +5,21 @@ export function isValidPublicUsername(value: string): boolean {
   return USERNAME_REGEX.test(u) && !RESERVED_USERNAMES.has(u)
 }
 
+/**
+ * Infer tenant + apex gallery host from a 4+ label hostname when env is unset.
+ * e.g. glowzip360.loopgallery.a-u.us → { tenant: glowzip360, galleryHost: loopgallery.a-u.us }
+ */
+export function parseTenantGalleryHost(hostname: string): { tenant: string, galleryHost: string } | null {
+  const host = hostname.split(':')[0]!.toLowerCase()
+  const parts = host.split('.')
+  if (parts.length < 4) return null
+
+  const tenant = parts[0]!
+  if (!isValidPublicUsername(tenant)) return null
+
+  return { tenant, galleryHost: parts.slice(1).join('.') }
+}
+
 /** Username from `alice.loopgallery.example.com` (single label only). */
 export function tenantUsernameFromHost(hostname: string, galleryHost: string): string | null {
   const host = hostname.split(':')[0]!.toLowerCase()

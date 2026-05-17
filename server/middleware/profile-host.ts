@@ -1,6 +1,7 @@
 import {
   galleryAppUrl,
   isValidPublicUsername,
+  parseTenantGalleryHost,
   profilePublicUrl,
   tenantUsernameFromHost,
 } from '~/shared/host'
@@ -9,14 +10,20 @@ const APP_PATH_PREFIXES = ['/dashboard', '/login']
 
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event)
-  const galleryHost = String(config.public.galleryHost || '')
-  if (!galleryHost) return
-
   const url = getRequestURL(event)
   if (url.pathname.startsWith('/api') || url.pathname.startsWith('/_')) return
 
   const hostname = getRequestHost(event, { xForwardedHost: true }).split(':')[0]!.toLowerCase()
-  const siteUrl = String(config.public.siteUrl || 'https://localhost')
+  const parsed = parseTenantGalleryHost(hostname)
+  const galleryHost = String(config.public.galleryHost || '') || parsed?.galleryHost || ''
+  if (!galleryHost) return
+
+  const configuredSite = String(config.public.siteUrl || '')
+  const siteUrl =
+    configuredSite && configuredSite !== 'http://localhost:3000'
+      ? configuredSite
+      : `https://${galleryHost}`
+
   const tenant = tenantUsernameFromHost(hostname, galleryHost)
 
   if (hostname === galleryHost.toLowerCase()) {
