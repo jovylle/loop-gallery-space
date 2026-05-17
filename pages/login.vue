@@ -26,6 +26,7 @@
 definePageMeta({ layout: 'default' })
 
 const { signInWithGoogle, user, profile, loading, isConfigured } = useAuth()
+const { profileUrl } = useProfileUrl()
 const signingIn = ref(false)
 const error = ref('')
 
@@ -34,7 +35,7 @@ watch(
   () => {
     if (loading.value || !user.value || !profile.value?.username) return
     if (profile.value.needsOnboarding) return
-    navigateTo(`/${profile.value.username}`)
+    navigateTo(profileUrl(profile.value.username))
   },
   { immediate: true },
 )
@@ -45,7 +46,7 @@ async function handleSignIn() {
   try {
     await signInWithGoogle()
     if (profile.value?.username) {
-      await navigateTo(`/${profile.value.username}`)
+      await navigateTo(profileUrl(profile.value.username))
     }
   }
   catch (e) {

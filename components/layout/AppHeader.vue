@@ -8,7 +8,7 @@
       </NuxtLink>
 
       <nav class="flex items-center gap-2 sm:gap-4">
-        <NuxtLink v-if="profile?.username" :to="`/${profile.username}`" class="btn-ghost hidden sm:inline-flex">
+        <NuxtLink v-if="profile?.username" :to="profileUrl(profile.username)" class="btn-ghost hidden sm:inline-flex">
           My gallery
         </NuxtLink>
         <NuxtLink v-if="user" to="/dashboard" class="btn-ghost hidden sm:inline-flex">
@@ -34,4 +34,5 @@
 
 <script setup lang="ts">
 const { user, profile, logout } = useAuth()
+const { profileUrl } = useProfileUrl()
 </script>

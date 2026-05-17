@@ -47,7 +47,8 @@ const props = defineProps<{
   username: string
 }>()
 
-const homeUrl = '/'
+const { appUrl } = useProfileUrl()
+const homeUrl = computed(() => appUrl('/'))
 
 const username = computed(() => props.username.toLowerCase())
 const { fetchProfile } = useGallery()

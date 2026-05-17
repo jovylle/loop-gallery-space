@@ -42,6 +42,7 @@ export default defineNuxtConfig({
       firebaseAppId: firebaseWebConfig.appId,
       mediaBaseUrl: process.env.NUXT_PUBLIC_MEDIA_BASE_URL || '',
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      galleryHost: process.env.NUXT_PUBLIC_GALLERY_HOST || '',
     },
   },
 

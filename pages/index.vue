@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <GalleryProfileView v-if="tenantUsername" :username="tenantUsername" />
+  <div v-else>
     <section class="text-center py-12 sm:py-20 animate-fade-up">
       <p class="font-mono text-sm text-accent mb-4 tracking-wider uppercase">
         {{ tagline }}
@@ -23,7 +24,7 @@
         <NuxtLink
           v-for="g in featured"
           :key="g.username"
-          :to="`/${g.username}`"
+          :to="profileUrl(g.username)"
           class="surface-card p-4 hover:border-accent/30 transition group"
         >
           <div
@@ -48,6 +49,9 @@
 </template>
 
 <script setup lang="ts">
+const tenantUsername = useTenantUsername()
+const { profileUrl } = useProfileUrl()
+
 const appConfig = useAppConfig()
 const tagline = appConfig.site.taglines[0]
 

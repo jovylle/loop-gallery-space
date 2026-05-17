@@ -20,11 +20,11 @@
       </NuxtLink>
       <NuxtLink
         v-if="profile?.username"
-        :to="`/${profile.username}`"
+        :to="profileUrl(profile.username)"
         class="surface-card p-6 hover:border-accent/30 transition block sm:col-span-2"
       >
         <h2 class="font-medium mb-1">View public gallery</h2>
-        <p class="text-sm font-mono text-accent">/{{ profile.username }}</p>
+        <p class="text-sm font-mono text-accent">{{ profileUrl(profile.username) }}</p>
       </NuxtLink>
     </div>
 
@@ -40,6 +40,7 @@ import { QUOTAS } from '~/shared/constants'
 definePageMeta({ middleware: 'auth' })
 
 const { profile } = useAuth()
+const { profileUrl } = useProfileUrl()
 const quotaMax = QUOTAS.maxStorageBytes
 
 function formatBytes(n: number) {

@@ -38,6 +38,7 @@
 definePageMeta({ middleware: 'auth' })
 
 const { profile, refreshProfile, completeOnboarding } = useAuth()
+const { profileUrl } = useProfileUrl()
 const { uploadFile } = useUpload()
 
 const avatarInput = ref<HTMLInputElement>()
@@ -50,7 +51,7 @@ onMounted(async () => {
   try {
     await completeOnboarding()
     if (profile.value?.username) {
-      await navigateTo(`/${profile.value.username}`)
+      await navigateTo(profileUrl(profile.value.username))
     }
   }
   finally {
@@ -74,7 +75,7 @@ async function onAvatar(e: Event) {
 async function onSaved() {
   await refreshProfile()
   if (profile.value?.username) {
-    await navigateTo(`/${profile.value.username}`)
+    await navigateTo(profileUrl(profile.value.username))
   }
 }
 </script>
