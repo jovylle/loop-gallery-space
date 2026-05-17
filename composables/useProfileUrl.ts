@@ -67,6 +67,24 @@ export function useProfileUrl() {
     return linkTo(profileUrl(username, path))
   }
 
+  /** External portfolio URL — opens in a new tab (e.g. Explore galleries). */
+  function profileLinkNewTab(username: string, path = '/') {
+    const url = profileUrl(username, path)
+    if (isAbsoluteUrl(url)) {
+      return {
+        to: url,
+        external: true as const,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }
+    }
+    return { to: url }
+  }
+
+  function isExternalProfileUrl(username: string, path = '/') {
+    return isAbsoluteUrl(profileUrl(username, path))
+  }
+
   function tenantUsername(hostname?: string): string | null {
     const host = (hostname ?? requestHostname())?.split(':')[0]
     if (!host) return null
@@ -87,6 +105,8 @@ export function useProfileUrl() {
     navigateToProfile,
     linkTo,
     profileLink,
+    profileLinkNewTab,
+    isExternalProfileUrl,
     tenantUsername,
   }
 }

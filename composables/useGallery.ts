@@ -1,12 +1,14 @@
 import type { PublicProfile } from '~/shared/types'
 
 export function useGallery() {
+  const api = useRequestFetch()
+
   async function fetchProfile(username: string) {
-    return $fetch<PublicProfile>(`/api/profiles/${encodeURIComponent(username)}`)
+    return api<PublicProfile>(`/api/profiles/${encodeURIComponent(username)}`)
   }
 
   async function fetchFeatured() {
-    return $fetch<Array<{
+    return api<Array<{
       username: string
       displayTitle: string
       bio: string | null

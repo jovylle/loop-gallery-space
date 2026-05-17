@@ -21,12 +21,8 @@
 <script setup lang="ts">
 const tenant = useTenantUsername()
 const { manageProfileUrl } = useProfileUrl()
-const { fetchProfile } = useGallery()
 
-const { data: profile } = await useAsyncData(
-  () => (tenant.value ? `profile-${tenant.value}` : 'profile-none'),
-  () => (tenant.value ? fetchProfile(tenant.value) : null),
-)
+const { data: profile } = useTenantProfile(tenant)
 
 const siteTitle = computed(() => {
   if (profile.value?.displayTitle) return profile.value.displayTitle

@@ -1,5 +1,5 @@
 <template>
-  <GalleryProfileView v-if="tenantUsername" :username="tenantUsername" />
+  <GalleryProfileView v-if="tenant" :username="tenant" />
   <div v-else>
     <section class="text-center py-12 sm:py-20 animate-fade-up">
       <p class="font-mono text-sm text-accent mb-4 tracking-wider uppercase">
@@ -24,9 +24,14 @@
         <NuxtLink
           v-for="g in featured"
           :key="g.username"
-          v-bind="profileLink(g.username)"
-          class="surface-card p-4 hover:border-accent/30 transition group"
+          v-bind="profileLinkNewTab(g.username)"
+          class="surface-card p-4 hover:border-accent/30 transition group relative block"
+          :aria-label="`Open ${g.displayTitle || g.username} gallery in new tab`"
         >
+          <UiExternalIcon
+            v-if="isExternalProfileUrl(g.username)"
+            class="absolute top-3 right-3"
+          />
           <div
             v-if="g.avatarUrl"
             class="w-12 h-12 rounded-full overflow-hidden mb-3 ring-1 ring-white/10 group-hover:ring-accent/40"
@@ -39,7 +44,7 @@
           >
             {{ g.username[0] }}
           </div>
-          <p class="font-medium truncate">{{ g.displayTitle }}</p>
+          <p class="font-medium truncate pr-6">{{ g.displayTitle }}</p>
           <p class="text-xs font-mono text-[var(--text-muted)]">@{{ g.username }}</p>
           <p class="text-xs text-[var(--text-muted)] mt-1">{{ g.itemCount }} items</p>
         </NuxtLink>
@@ -49,19 +54,20 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ middleware: 'tenant-portfolio-layout' })
+
 const tenantUsername = useTenantUsername()
+const tenant = computed(() => tenantUsername.value || '')
 
-if (tenantUsername.value) {
-  setPageLayout('portfolio')
-}
-
-const { profileLink } = useProfileUrl()
+const { profileLinkNewTab, isExternalProfileUrl } = useProfileUrl()
 
 const appConfig = useAppConfig()
 const tagline = appConfig.site.taglines[0]
 
 const { fetchFeatured } = useGallery()
-const { data: featured } = await useAsyncData('featured', () => fetchFeatured().catch(() => []), {
-  default: () => [],
-})
+const { data: featured } = await useAsyncData(
+  'featured',
+  () => (tenant.value ? Promise.resolve([]) : fetchFeatured().catch(() => [])),
+  { default: () => [] },
+)
 </script>

@@ -62,13 +62,9 @@ const publicShareUrl = computed(() => profileUrl(username.value))
 const homeUrl = computed(() => (isPortfolio.value ? '/' : appUrl('/')))
 
 const username = computed(() => props.username.toLowerCase())
-const { fetchProfile } = useGallery()
 const { viewMode, sortMode, sortedItems } = useGalleryView()
 
-const { data: profile, pending, error } = await useAsyncData(
-  () => `profile-${username.value}`,
-  () => fetchProfile(username.value),
-)
+const { data: profile, pending, error } = useTenantProfile(username)
 
 const displayItems = computed(() =>
   profile.value ? sortedItems(profile.value.items) : [],
