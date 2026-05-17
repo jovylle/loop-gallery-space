@@ -67,12 +67,16 @@ const { appUrl, profileUrl, navigateToHref } = useProfileUrl()
 const { profile: authProfile, loading: authLoading, isAuthenticated } = useAuth()
 
 const isManageMode = computed(() => route.query.manage === '1')
-const showManageBanner = computed(() => !isPortfolio.value && isManageMode.value)
 const isOwner = computed(
   () =>
     isAuthenticated.value
     && authProfile.value?.username?.toLowerCase() === username.value,
 )
+/** Tenant subdomains are public portfolios — no manage/share chrome there (see PortfolioHeader). */
+const showManageBanner = computed(
+  () => !isPortfolio.value && isManageMode.value && isOwner.value,
+)
+/** Upload/organize UI only for the signed-in owner on apex `?manage=1`. */
 const showManageTools = computed(() => isManageMode.value && isOwner.value)
 const publicShareUrl = computed(() => profileUrl(username.value))
 const homeUrl = computed(() => (isPortfolio.value ? '/' : appUrl('/')))
@@ -86,6 +90,7 @@ const displayItems = computed(() =>
   profile.value ? sortedItems(profile.value.items) : [],
 )
 
+// `?manage=1` is owner-only: guests sign in; other signed-in users go home (not a public view).
 watch(
   [isManageMode, authLoading, isAuthenticated, isOwner],
   () => {

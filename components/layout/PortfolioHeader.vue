@@ -9,14 +9,18 @@
 
       <div class="flex items-center gap-2 shrink-0">
         <UiThemeToggle />
+        <!--
+          Manage is tucked in the menu (not shown as a header button) and only for the
+          signed-in gallery owner — public visitors must not see an edit affordance here.
+        -->
         <UiBurgerMenu
-          v-if="manageLink"
+          v-if="ownerManageLink"
           label="Gallery menu"
         >
           <template #default="{ close }">
             <a
               role="menuitem"
-              :href="manageLink"
+              :href="ownerManageLink"
               @click="close"
             >
               Manage
@@ -29,6 +33,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * Portfolio layout header (tenant subdomain, e.g. user.loopgallery.com).
+ * Public visitors see theme toggle only. Signed-in owners get a menu "Manage" link
+ * to the apex dashboard (`/{username}?manage=1`); everyone else gets nothing.
+ */
 const tenant = useTenantUsername()
 const { manageProfileUrl } = useProfileUrl()
 const { profile: authProfile, isAuthenticated } = useAuth()
@@ -42,7 +51,7 @@ const siteTitle = computed(() => {
   return 'Gallery'
 })
 
-const manageLink = computed(() => {
+const ownerManageLink = computed(() => {
   if (!tenant.value || !isAuthenticated.value) return ''
   if (authProfile.value?.username?.toLowerCase() !== tenant.value.toLowerCase()) return ''
   return manageProfileUrl(tenant.value)
