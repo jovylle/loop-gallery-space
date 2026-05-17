@@ -1,5 +1,9 @@
 import { RESERVED_USERNAMES, USERNAME_REGEX } from '~/shared/constants'
 
+export function isAbsoluteUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url)
+}
+
 export function isValidPublicUsername(value: string): boolean {
   const u = value.toLowerCase()
   return USERNAME_REGEX.test(u) && !RESERVED_USERNAMES.has(u)

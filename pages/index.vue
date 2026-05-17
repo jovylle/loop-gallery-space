@@ -24,7 +24,7 @@
         <NuxtLink
           v-for="g in featured"
           :key="g.username"
-          :to="profileUrl(g.username)"
+          v-bind="profileLink(g.username)"
           class="surface-card p-4 hover:border-accent/30 transition group"
         >
           <div
@@ -55,7 +55,7 @@ if (tenantUsername.value) {
   setPageLayout('portfolio')
 }
 
-const { profileUrl } = useProfileUrl()
+const { profileLink } = useProfileUrl()
 
 const appConfig = useAppConfig()
 const tagline = appConfig.site.taglines[0]

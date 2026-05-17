@@ -54,6 +54,21 @@ export default defineNuxtConfig({
     cloudflare: {
       deployConfig: true,
       nodeCompat: true,
+      // Merged into generated .output/server/wrangler.json on deploy.
+      // Without this, deployConfig emits "vars": {} and wipes dashboard variables.
+      wrangler: {
+        vars: {
+          ...(process.env.NUXT_PUBLIC_GALLERY_HOST
+            ? { NUXT_PUBLIC_GALLERY_HOST: process.env.NUXT_PUBLIC_GALLERY_HOST }
+            : {}),
+          ...(process.env.NUXT_PUBLIC_SITE_URL
+            ? { NUXT_PUBLIC_SITE_URL: process.env.NUXT_PUBLIC_SITE_URL }
+            : {}),
+          ...(process.env.NUXT_PUBLIC_MEDIA_BASE_URL
+            ? { NUXT_PUBLIC_MEDIA_BASE_URL: process.env.NUXT_PUBLIC_MEDIA_BASE_URL }
+            : {}),
+        },
+      },
     },
   },
 

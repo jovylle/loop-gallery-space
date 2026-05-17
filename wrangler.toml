@@ -12,5 +12,9 @@ migrations_dir = "server/database/migrations"
 binding = "loopgallery-media"
 bucket_name = "loopgallery-media"
 
+# Non-secret runtime vars (also set as Build variables for NUXT_PUBLIC_* during npm run build).
+# Secrets (R2_ACCESS_KEY_ID, etc.) must use: wrangler secret put NAME
+# Do not leave [vars] empty — deploy merges generated wrangler.json and can wipe dashboard-only vars.
 [vars]
-# Set in Cloudflare Pages dashboard for production
+NUXT_PUBLIC_GALLERY_HOST = "loopgallery.a-u.us"
+NUXT_PUBLIC_SITE_URL = "https://loopgallery.a-u.us"

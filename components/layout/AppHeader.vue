@@ -8,8 +8,14 @@
       </NuxtLink>
 
       <nav class="flex items-center gap-2 sm:gap-4">
-        <NuxtLink v-if="profile?.username" :to="profileUrl(profile.username)" class="btn-ghost hidden sm:inline-flex">
+        <NuxtLink
+          v-if="profile?.username"
+          v-bind="myGalleryLink"
+          class="btn-ghost hidden sm:inline-flex items-center gap-1.5"
+          :aria-label="myGalleryIsExternal ? 'My gallery (opens your public portfolio)' : 'My gallery'"
+        >
           My gallery
+          <UiExternalIcon v-if="myGalleryIsExternal" />
         </NuxtLink>
         <NuxtLink v-if="isAuthenticated" to="/dashboard" class="btn-ghost hidden sm:inline-flex">
           Dashboard
@@ -34,5 +40,15 @@
 
 <script setup lang="ts">
 const { profile, logout, isAuthenticated } = useAuth()
-const { profileUrl } = useProfileUrl()
+const { profileLink, profileUrl } = useProfileUrl()
+
+const myGalleryLink = computed(() =>
+  profile.value?.username ? profileLink(profile.value.username) : {},
+)
+
+const myGalleryIsExternal = computed(() => {
+  if (!profile.value?.username) return false
+  const url = profileUrl(profile.value.username)
+  return url.startsWith('http://') || url.startsWith('https://')
+})
 </script>

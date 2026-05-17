@@ -1,5 +1,6 @@
 import {
   galleryAppUrl,
+  isAbsoluteUrl,
   parseTenantGalleryHost,
   profilePublicUrl,
   tenantUsernameFromHost,
@@ -49,6 +50,23 @@ export function useProfileUrl() {
     return appUrl(`/${u}?manage=1`)
   }
 
+  function navigateToHref(url: string) {
+    return isAbsoluteUrl(url) ? navigateTo(url, { external: true }) : navigateTo(url)
+  }
+
+  function navigateToProfile(username: string, path = '/') {
+    return navigateToHref(profileUrl(username, path))
+  }
+
+  /** Props for NuxtLink when `to` may be a full https URL. */
+  function linkTo(url: string) {
+    return isAbsoluteUrl(url) ? { to: url, external: true as const } : { to: url }
+  }
+
+  function profileLink(username: string, path = '/') {
+    return linkTo(profileUrl(username, path))
+  }
+
   function tenantUsername(hostname?: string): string | null {
     const host = (hostname ?? requestHostname())?.split(':')[0]
     if (!host) return null
@@ -65,6 +83,10 @@ export function useProfileUrl() {
     profileUrl,
     appUrl,
     manageProfileUrl,
+    navigateToHref,
+    navigateToProfile,
+    linkTo,
+    profileLink,
     tenantUsername,
   }
 }
