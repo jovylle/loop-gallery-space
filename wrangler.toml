@@ -5,7 +5,8 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "loopgallery-db"
 database_name = "loopgallery-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "9c338118-ec94-41bc-90d1-f58f1bde24c9"
+migrations_dir = "server/database/migrations"
 
 [[r2_buckets]]
 binding = "loopgallery-media"
