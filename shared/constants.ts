@@ -26,6 +26,7 @@ export const RESERVED_USERNAMES = new Set([
   'settings',
   'privacy',
   'terms',
+  'account',
   'null',
   'undefined',
 ])

@@ -7,7 +7,7 @@ import {
 } from '~/shared/host'
 
 const APP_PATH_PREFIXES = ['/dashboard', '/login']
-const APP_STATIC_PATHS = new Set(['/privacy', '/terms'])
+const APP_STATIC_PATHS = new Set(['/privacy', '/terms', '/account/delete'])
 
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event)

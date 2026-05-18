@@ -79,5 +79,6 @@ export default defineNuxtConfig({
     '/dashboard/**': { ssr: false },
     '/login': { ssr: false },
     '/privacy': { prerender: true },
+    '/account/delete': { prerender: true },
   },
 })
