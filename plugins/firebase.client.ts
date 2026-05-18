@@ -14,7 +14,12 @@ async function createAuth(firebaseApp: FirebaseApp): Promise<Auth> {
   if (import.meta.client) {
     const { Capacitor } = await import('@capacitor/core')
     if (Capacitor.isNativePlatform()) {
-      return initializeAuth(firebaseApp, { persistence: indexedDBLocalPersistence })
+      try {
+        return initializeAuth(firebaseApp, { persistence: indexedDBLocalPersistence })
+      }
+      catch {
+        return getAuth(firebaseApp)
+      }
     }
   }
   return getAuth(firebaseApp)

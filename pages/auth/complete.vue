@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth'
+import { parseOAuthBridgeHash } from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
 
@@ -37,6 +38,7 @@ const status = ref('Securing your session…')
 const error = ref('')
 const done = ref(false)
 const showOpenApp = ref(false)
+let finishing = false
 
 const returnUrl = computed(() => {
   if (!import.meta.client) return '/auth/complete'
@@ -53,23 +55,27 @@ onMounted(() => {
 })
 
 async function completeSignIn() {
+  if (finishing) return
+  finishing = true
+
   if (!$firebaseAuth) {
     error.value = 'Firebase is not configured.'
+    finishing = false
     return
   }
 
-  const hash = import.meta.client ? window.location.hash.slice(1) : ''
-  const params = new URLSearchParams(hash)
-  const googleIdToken = params.get('gid')
-  const googleAccessToken = params.get('gat')
+  const hash = import.meta.client ? window.location.hash : ''
+  const { googleIdToken, googleAccessToken } = parseOAuthBridgeHash(hash)
 
   if (!googleIdToken && !googleAccessToken) {
     if (showOpenApp.value) {
       status.value = 'Tap the button below to return to the app.'
-      return
     }
-    error.value = 'Missing sign-in token. Please try again from the app.'
-    status.value = ''
+    else {
+      error.value = 'Missing sign-in token. Please try again from the app.'
+      status.value = ''
+    }
+    finishing = false
     return
   }
 
@@ -83,6 +89,7 @@ async function completeSignIn() {
 
     done.value = true
     status.value = 'Redirecting…'
+
     if (import.meta.client) {
       history.replaceState(null, '', '/auth/complete')
       const { isCapacitorNative } = useCapacitor()
@@ -102,8 +109,12 @@ async function completeSignIn() {
     await navigateTo('/dashboard')
   }
   catch (e) {
-    error.value = e instanceof Error ? e.message : 'Could not complete sign-in'
+    const code = e && typeof e === 'object' && 'code' in e ? String((e as { code: string }).code) : ''
+    error.value = code
+      ? `Sign-in failed (${code}). Close the app and try again.`
+      : (e instanceof Error ? e.message : 'Could not complete sign-in')
     status.value = ''
+    finishing = false
   }
 }
 </script>

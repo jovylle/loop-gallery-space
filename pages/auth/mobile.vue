@@ -20,6 +20,7 @@ import {
   signInWithRedirect,
   type UserCredential,
 } from 'firebase/auth'
+import { buildOAuthBridgeHash } from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
 
@@ -58,9 +59,15 @@ async function finishWithOAuthCredential(result: UserCredential) {
     return
   }
 
-  const params = new URLSearchParams()
-  if (oauth.idToken) params.set('gid', oauth.idToken)
-  if (oauth.accessToken) params.set('gat', oauth.accessToken)
-  window.location.replace(`/auth/complete#${params.toString()}`)
+  const hash = buildOAuthBridgeHash({
+    googleIdToken: oauth.idToken,
+    googleAccessToken: oauth.accessToken,
+  })
+  if (!hash) {
+    error.value = 'Could not package sign-in credentials.'
+    status.value = ''
+    return
+  }
+  window.location.replace(`/auth/complete${hash}`)
 }
 </script>
