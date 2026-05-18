@@ -18,9 +18,10 @@ import {
   getRedirectResult,
   GoogleAuthProvider,
   signInWithRedirect,
+  signOut,
   type UserCredential,
 } from 'firebase/auth'
-import { buildOAuthBridgeHash } from '~/shared/auth-bridge'
+import { buildOAuthBridgeQuery, isLikelyGoogleIdToken } from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
 
@@ -59,15 +60,24 @@ async function finishWithOAuthCredential(result: UserCredential) {
     return
   }
 
-  const hash = buildOAuthBridgeHash({
+  if (!isLikelyGoogleIdToken(oauth.idToken)) {
+    error.value = 'Google sign-in token was invalid. Please try again.'
+    status.value = ''
+    return
+  }
+
+  const query = buildOAuthBridgeQuery({
     googleIdToken: oauth.idToken,
     googleAccessToken: oauth.accessToken,
   })
-  if (!hash) {
+  if (!query) {
     error.value = 'Could not package sign-in credentials.'
     status.value = ''
     return
   }
-  window.location.replace(`/auth/complete${hash}`)
+
+  // Sign out in the Custom Tab so /auth/complete can sign into the app WebView cleanly.
+  await signOut($firebaseAuth).catch(() => {})
+  window.location.replace(`/auth/complete${query}`)
 }
 </script>

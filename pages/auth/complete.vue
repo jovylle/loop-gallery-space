@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth'
-import { parseOAuthBridgeHash } from '~/shared/auth-bridge'
+import { isLikelyGoogleIdToken, readOAuthBridgeTokens } from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
 
@@ -40,16 +40,15 @@ const done = ref(false)
 const showOpenApp = ref(false)
 let finishing = false
 
-const returnUrl = computed(() => {
-  if (!import.meta.client) return '/auth/complete'
-  return window.location.href
-})
+/** Captured before replaceState strips OAuth query params from the address bar. */
+const returnUrl = ref('/auth/complete')
 
 onMounted(() => {
   if (import.meta.client) {
     const { isCapacitorNative } = useCapacitor()
-    const hash = window.location.hash
-    showOpenApp.value = !isCapacitorNative() && (hash.includes('gid=') || hash.includes('gat='))
+    const href = window.location.href
+    returnUrl.value = href
+    showOpenApp.value = !isCapacitorNative() && (href.includes('gid=') || href.includes('gat='))
   }
   void completeSignIn()
 })
@@ -64,8 +63,9 @@ async function completeSignIn() {
     return
   }
 
-  const hash = import.meta.client ? window.location.hash : ''
-  const { googleIdToken, googleAccessToken } = parseOAuthBridgeHash(hash)
+  const { googleIdToken, googleAccessToken } = import.meta.client
+    ? readOAuthBridgeTokens()
+    : { googleIdToken: null, googleAccessToken: null }
 
   if (!googleIdToken && !googleAccessToken) {
     if (showOpenApp.value) {
@@ -80,8 +80,22 @@ async function completeSignIn() {
   }
 
   try {
-    const credential = GoogleAuthProvider.credential(googleIdToken, googleAccessToken)
-    await signInWithCredential($firebaseAuth, credential)
+    if (!$firebaseAuth.currentUser) {
+      const idToken = googleIdToken?.trim() || null
+      const accessToken = googleAccessToken?.trim() || null
+
+      if (!isLikelyGoogleIdToken(idToken) && !accessToken) {
+        error.value = 'Sign-in token was invalid or corrupted. Please try again from the app.'
+        status.value = ''
+        finishing = false
+        return
+      }
+
+      const credential = isLikelyGoogleIdToken(idToken)
+        ? GoogleAuthProvider.credential(idToken, accessToken || undefined)
+        : GoogleAuthProvider.credential(null, accessToken)
+      await signInWithCredential($firebaseAuth, credential)
+    }
     await refreshProfile()
     if (profile.value?.needsOnboarding) {
       await completeOnboarding()

@@ -70,7 +70,14 @@ export function useAuth() {
 
   async function signInWithGoogleBrowser() {
     const config = useRuntimeConfig()
-    const site = String(config.public.siteUrl || 'https://loopgallery.a-u.us').replace(/\/$/, '')
+    let site = String(config.public.siteUrl || 'https://loopgallery.a-u.us').replace(/\/$/, '')
+    // Emulator WebView uses 10.0.2.2 — Custom Tab must use the same origin, not localhost.
+    if (import.meta.client) {
+      const { isCapacitorNative } = useCapacitor()
+      if (isCapacitorNative()) {
+        site = window.location.origin
+      }
+    }
     const { Browser } = await import('@capacitor/browser')
     await Browser.open({ url: `${site}/auth/mobile` })
   }
