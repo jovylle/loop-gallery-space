@@ -23,7 +23,7 @@
             {{ item }}
           </li>
         </ul>
-      </section>
+      </div>
     </section>
 
     <p class="text-sm text-[var(--text-muted)] border-t border-[var(--border)] pt-8">

@@ -12,7 +12,7 @@
       :disabled="loading || signingIn"
       @click="handleSignIn"
     >
-      {{ signingIn ? 'Setting up your space…' : 'Continue with Google' }}
+      {{ signingInLabel }}
     </button>
     <p v-else class="text-amber-400 text-sm">
       Firebase is not configured. Check <code class="font-mono">shared/firebase.config.ts</code>.
@@ -25,11 +25,18 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
-const { signInWithGoogle, user, profile, loading, isConfigured } = useAuth()
+const { signInWithGoogle, signInWithGoogleBrowser, user, profile, loading, isConfigured } = useAuth()
 const route = useRoute()
 const { navigateToHref, resolvePostLoginPath } = useProfileUrl()
 const signingIn = ref(false)
 const error = ref('')
+const { isCapacitorNative } = useCapacitor()
+
+const signingInLabel = computed(() => {
+  if (!signingIn.value) return 'Continue with Google'
+  if (isCapacitorNative()) return 'Continue in the browser…'
+  return 'Setting up your space…'
+})
 
 function goAfterLogin() {
   const username = profile.value?.username
@@ -52,6 +59,10 @@ async function handleSignIn() {
   error.value = ''
   signingIn.value = true
   try {
+    if (isCapacitorNative()) {
+      await signInWithGoogleBrowser()
+      return
+    }
     await signInWithGoogle()
     if (profile.value?.username) {
       await goAfterLogin()
@@ -61,7 +72,10 @@ async function handleSignIn() {
     error.value = e instanceof Error ? e.message : 'Sign in failed'
   }
   finally {
-    signingIn.value = false
+    const { isCapacitorNative } = useCapacitor()
+    if (!isCapacitorNative()) {
+      signingIn.value = false
+    }
   }
 }
 </script>

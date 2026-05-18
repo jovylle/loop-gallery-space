@@ -78,6 +78,7 @@ export default defineNuxtConfig({
   routeRules: {
     '/dashboard/**': { ssr: false },
     '/login': { ssr: false },
+    '/auth/**': { ssr: false },
     '/privacy': { prerender: true },
     '/account/delete': { prerender: true },
   },

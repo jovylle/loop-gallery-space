@@ -2,7 +2,6 @@ import {
   getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
   type User,
 } from 'firebase/auth'
@@ -69,21 +68,23 @@ export function useAuth() {
     }
   }
 
+  async function signInWithGoogleBrowser() {
+    const config = useRuntimeConfig()
+    const site = String(config.public.siteUrl || 'https://loopgallery.a-u.us').replace(/\/$/, '')
+    const { Browser } = await import('@capacitor/browser')
+    await Browser.open({ url: `${site}/auth/mobile` })
+  }
+
   async function signInWithGoogle() {
     if (!$firebaseAuth || !$googleProvider) {
       throw new Error('Firebase not configured')
     }
     const { isCapacitorNative } = useCapacitor()
+    // Always use Chrome Custom Tabs on Android — WebView OAuth gets disallowed_useragent.
+    // Native Firebase auth only when google-services.json is configured (see signInWithGoogleNative).
     if (isCapacitorNative()) {
-      try {
-        await signInWithGoogleNative()
-        return
-      }
-      catch (e) {
-        console.warn('[LoopGallery] Native Google sign-in failed, trying redirect:', e)
-        await signInWithRedirect($firebaseAuth, $googleProvider)
-        return
-      }
+      await signInWithGoogleBrowser()
+      return
     }
     await signInWithPopup($firebaseAuth, $googleProvider)
     await refreshProfile()
@@ -120,9 +121,7 @@ export function useAuth() {
     void import('@capacitor/app').then(({ App }) => {
       App.addListener('appUrlOpen', ({ url }) => {
         if (!isSameGalleryAppUrl(url, galleryHost)) return
-        const normalized = url.replace(/\/$/, '')
-        const here = window.location.href.replace(/\/$/, '')
-        if (normalized !== here) window.location.assign(url)
+        window.location.assign(url)
       })
       App.addListener('resume', () => {
         void finishRedirectSignIn()
@@ -161,6 +160,7 @@ export function useAuth() {
     isAuthenticated,
     signInWithGoogle,
     signInWithGoogleNative,
+    signInWithGoogleBrowser,
     completeOnboarding,
     logout,
     refreshProfile,

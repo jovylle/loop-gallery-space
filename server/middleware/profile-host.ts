@@ -12,7 +12,7 @@ const APP_STATIC_PATHS = new Set(['/privacy', '/terms', '/account/delete'])
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event)
   const url = getRequestURL(event)
-  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/_')) return
+  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/_') || url.pathname.startsWith('/auth/')) return
 
   const hostname = getRequestHost(event, { xForwardedHost: true }).split(':')[0]!.toLowerCase()
   const parsed = parseTenantGalleryHost(hostname)
