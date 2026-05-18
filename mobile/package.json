@@ -1,0 +1,31 @@
+{
+  "name": "loop-gallery-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Capacitor shell for LoopGallery (Play Store). Loads the live web app; does not replace the Nuxt build.",
+  "scripts": {
+    "sync": "cap sync",
+    "sync:android": "cap sync android",
+    "open:android": "cap open android",
+    "run:android": "cap run android",
+    "build:android": "cd android && ./gradlew assembleRelease",
+    "assets:generate": "capacitor-assets generate --android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.2.0",
+    "typescript": "^5.7.3"
+  },
+  "capacitor": {
+    "platforms": [
+      "android"
+    ]
+  }
+}

@@ -23,6 +23,8 @@ export default defineNuxtConfig({
       title: 'LoopGallery',
       meta: [
         { name: 'description', content: 'Your own corner of the internet — collect loops, memories, moods.' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -76,5 +78,6 @@ export default defineNuxtConfig({
   routeRules: {
     '/dashboard/**': { ssr: false },
     '/login': { ssr: false },
+    '/privacy': { prerender: true },
   },
 })

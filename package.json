@@ -11,9 +11,16 @@
     "db:migrate": "wrangler d1 migrations apply loopgallery-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply loopgallery-db --remote",
     "lint": "eslint .",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "mobile:install": "npm install --prefix mobile",
+    "mobile:sync": "npm run sync --prefix mobile",
+    "mobile:android": "npm run open:android --prefix mobile",
+    "mobile:assets": "npm run assets:generate --prefix mobile",
+    "mobile:release": "bash mobile/scripts/play-release.sh"
   },
   "dependencies": {
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/status-bar": "^7.0.1",
     "aws4fetch": "^1.0.20",
     "@vueuse/core": "^12.5.0",
     "firebase": "^11.2.0",

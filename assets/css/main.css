@@ -49,6 +49,15 @@ body {
     radial-gradient(ellipse 60% 40% at 100% 100%, color-mix(in srgb, var(--accent-dim) 8%, transparent), transparent);
 }
 
+/* Capacitor Android/iOS shell — extra inset when edge-to-edge still reports safe areas */
+html.capacitor-native header.sticky {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+html.capacitor-native .min-h-screen.flex.flex-col {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 @layer components {
   .surface-card {
     @apply backdrop-blur-md rounded-2xl border shadow-soft;

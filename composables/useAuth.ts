@@ -1,6 +1,8 @@
 import {
+  getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   type User,
 } from 'firebase/auth'
@@ -56,6 +58,11 @@ export function useAuth() {
     if (!$firebaseAuth || !$googleProvider) {
       throw new Error('Firebase not configured')
     }
+    const { isCapacitorNative } = useCapacitor()
+    if (isCapacitorNative()) {
+      await signInWithRedirect($firebaseAuth, $googleProvider)
+      return
+    }
     await signInWithPopup($firebaseAuth, $googleProvider)
     await refreshProfile()
     if (profile.value?.needsOnboarding) {
@@ -70,11 +77,23 @@ export function useAuth() {
     await navigateTo('/')
   }
 
+  async function finishRedirectSignIn() {
+    if (!$firebaseAuth) return
+    const result = await getRedirectResult($firebaseAuth)
+    if (!result?.user) return
+    await refreshProfile()
+    if (profile.value?.needsOnboarding) {
+      await completeOnboarding()
+    }
+  }
+
   function initAuthListener() {
     if (!$firebaseAuth) {
       loading.value = false
       return
     }
+
+    void finishRedirectSignIn()
 
     onAuthStateChanged($firebaseAuth, async (u) => {
       user.value = u

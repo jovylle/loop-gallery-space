@@ -7,6 +7,7 @@ import {
 } from '~/shared/host'
 
 const APP_PATH_PREFIXES = ['/dashboard', '/login']
+const APP_STATIC_PATHS = new Set(['/privacy', '/terms'])
 
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event)
@@ -27,6 +28,8 @@ export default defineEventHandler((event) => {
   const tenant = tenantUsernameFromHost(hostname, galleryHost)
 
   if (hostname === galleryHost.toLowerCase()) {
+    if (APP_STATIC_PATHS.has(url.pathname)) return
+
     const match = url.pathname.match(/^\/([a-z0-9_]{3,24})\/?$/)
     if (match && isValidPublicUsername(match[1]!) && !url.searchParams.has('manage')) {
       return sendRedirect(
