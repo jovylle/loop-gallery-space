@@ -41,3 +41,4 @@ mobile/android/app/google-services.json
 !mobile/android/app/debug.keystore
 mobile/android/keystore.properties
 mobile/loopgallery-release.keystore
+mobile/RELEASE_SIGNING.local.txt
