@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "us.a_u.loopgallery.app",
+      "sha256_cert_fingerprints": [
+        "F2:41:BA:1E:A8:AE:63:B5:D7:91:80:ED:A6:47:0E:02:22:A8:2B:30:12:6A:FD:20:42:5B:39:C6:B2:C0:EA:A6"
+      ]
+    }
+  }
+]

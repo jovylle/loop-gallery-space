@@ -6,6 +6,7 @@ import {
   signOut,
   type User,
 } from 'firebase/auth'
+import { isSameGalleryAppUrl } from '~/shared/host'
 import type { AuthUser } from '~/shared/types'
 
 export function useAuth() {
@@ -54,14 +55,35 @@ export function useAuth() {
     return profile.value
   }
 
+  async function signInWithGoogleNative() {
+    if (!$firebaseAuth) throw new Error('Firebase not configured')
+    const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication')
+    const { GoogleAuthProvider, signInWithCredential } = await import('firebase/auth')
+    const result = await FirebaseAuthentication.signInWithGoogle()
+    const idToken = result.credential?.idToken
+    if (!idToken) throw new Error('Google sign in was cancelled')
+    await signInWithCredential($firebaseAuth, GoogleAuthProvider.credential(idToken))
+    await refreshProfile()
+    if (profile.value?.needsOnboarding) {
+      await completeOnboarding()
+    }
+  }
+
   async function signInWithGoogle() {
     if (!$firebaseAuth || !$googleProvider) {
       throw new Error('Firebase not configured')
     }
     const { isCapacitorNative } = useCapacitor()
     if (isCapacitorNative()) {
-      await signInWithRedirect($firebaseAuth, $googleProvider)
-      return
+      try {
+        await signInWithGoogleNative()
+        return
+      }
+      catch (e) {
+        console.warn('[LoopGallery] Native Google sign-in failed, trying redirect:', e)
+        await signInWithRedirect($firebaseAuth, $googleProvider)
+        return
+      }
     }
     await signInWithPopup($firebaseAuth, $googleProvider)
     await refreshProfile()
@@ -87,12 +109,34 @@ export function useAuth() {
     }
   }
 
+  function initNativeAuthBridge() {
+    if (!import.meta.client) return
+    const { isCapacitorNative } = useCapacitor()
+    if (!isCapacitorNative()) return
+
+    const config = useRuntimeConfig()
+    const galleryHost = String(config.public.galleryHost || '')
+
+    void import('@capacitor/app').then(({ App }) => {
+      App.addListener('appUrlOpen', ({ url }) => {
+        if (!isSameGalleryAppUrl(url, galleryHost)) return
+        const normalized = url.replace(/\/$/, '')
+        const here = window.location.href.replace(/\/$/, '')
+        if (normalized !== here) window.location.assign(url)
+      })
+      App.addListener('resume', () => {
+        void finishRedirectSignIn()
+      })
+    })
+  }
+
   function initAuthListener() {
     if (!$firebaseAuth) {
       loading.value = false
       return
     }
 
+    initNativeAuthBridge()
     void finishRedirectSignIn()
 
     onAuthStateChanged($firebaseAuth, async (u) => {
@@ -116,9 +160,11 @@ export function useAuth() {
     loading,
     isAuthenticated,
     signInWithGoogle,
+    signInWithGoogleNative,
     completeOnboarding,
     logout,
     refreshProfile,
+    finishRedirectSignIn,
     getIdToken,
     apiFetch,
     initAuthListener,

@@ -1,11 +1,26 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth'
+import {
+  getAuth,
+  GoogleAuthProvider,
+  initializeAuth,
+  indexedDBLocalPersistence,
+  type Auth,
+} from 'firebase/auth'
 import { firebaseWebConfig } from '~/shared/firebase.config'
 
 let app: FirebaseApp | null = null
-let auth: Auth | null = null
 
-export default defineNuxtPlugin(() => {
+async function createAuth(firebaseApp: FirebaseApp): Promise<Auth> {
+  if (import.meta.client) {
+    const { Capacitor } = await import('@capacitor/core')
+    if (Capacitor.isNativePlatform()) {
+      return initializeAuth(firebaseApp, { persistence: indexedDBLocalPersistence })
+    }
+  }
+  return getAuth(firebaseApp)
+}
+
+export default defineNuxtPlugin(async () => {
   const config = useRuntimeConfig()
   const authDomain = String(config.public.firebaseAuthDomain || firebaseWebConfig.authDomain)
 
@@ -31,7 +46,7 @@ export default defineNuxtPlugin(() => {
     app = getApps()[0]!
   }
 
-  auth = getAuth(app)
+  const auth = await createAuth(app)
   const googleProvider = new GoogleAuthProvider()
 
   return {

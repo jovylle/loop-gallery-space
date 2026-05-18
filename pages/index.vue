@@ -26,7 +26,7 @@
           :key="g.username"
           v-bind="profileLinkNewTab(g.username)"
           class="surface-card p-4 hover:border-accent/30 transition group relative block"
-          :aria-label="`Open ${g.displayTitle || g.username} gallery in new tab`"
+          :aria-label="isExternalProfileUrl(g.username) ? `Open ${g.displayTitle || g.username} gallery in new tab` : `Open ${g.displayTitle || g.username} gallery`"
         >
           <UiExternalIcon
             v-if="isExternalProfileUrl(g.username)"

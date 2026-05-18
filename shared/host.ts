@@ -42,6 +42,18 @@ export function isGalleryAppHost(hostname: string, galleryHost: string): boolean
   return host === galleryHost.toLowerCase() || tenantUsernameFromHost(host, galleryHost) !== null
 }
 
+/** Apex or tenant subdomain of this gallery (not a third-party site). */
+export function isSameGalleryAppUrl(url: string, galleryHost: string): boolean {
+  if (!galleryHost || !isAbsoluteUrl(url)) return !isAbsoluteUrl(url)
+  try {
+    const host = new URL(url).hostname.split(':')[0]!.toLowerCase()
+    return isGalleryAppHost(host, galleryHost)
+  }
+  catch {
+    return false
+  }
+}
+
 export function galleryAppUrl(galleryHost: string, siteUrl: string, path = '/'): string {
   const proto = siteUrl.startsWith('http://') ? 'http' : 'https'
   const suffix = path === '/' ? '/' : path

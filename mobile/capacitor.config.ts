@@ -32,6 +32,10 @@ const config: CapacitorConfig = {
       backgroundColor: '#0a0a0f',
       overlaysWebView: false,
     },
+    FirebaseAuthentication: {
+      skipNativeAuth: false,
+      providers: ['google.com'],
+    },
   },
   ...(useRemoteServer
     ? {
@@ -39,6 +43,14 @@ const config: CapacitorConfig = {
           url: serverUrl,
           cleartext: serverUrl.startsWith('http://'),
           androidScheme: 'https',
+          // Keep tenant subdomains (user.loopgallery.a-u.us) inside the WebView.
+          allowNavigation: [
+            new URL(productionUrl).hostname,
+            `*.${new URL(productionUrl).hostname}`,
+            '*.firebaseapp.com',
+            '*.google.com',
+            'accounts.google.com',
+          ],
         },
       }
     : {}),

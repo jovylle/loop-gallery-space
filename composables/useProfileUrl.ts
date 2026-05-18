@@ -1,6 +1,7 @@
 import {
   galleryAppUrl,
   isAbsoluteUrl,
+  isSameGalleryAppUrl,
   parseTenantGalleryHost,
   profilePublicUrl,
   tenantUsernameFromHost,
@@ -35,6 +36,10 @@ export function useProfileUrl() {
     return configured || 'http://localhost:3000'
   })
 
+  function staysInGalleryApp(url: string): boolean {
+    return isSameGalleryAppUrl(url, galleryHost.value)
+  }
+
   function profileUrl(username: string, path = '/'): string {
     return profilePublicUrl(username, galleryHost.value, siteUrl.value, path)
   }
@@ -51,6 +56,13 @@ export function useProfileUrl() {
   }
 
   function navigateToHref(url: string) {
+    if (staysInGalleryApp(url)) {
+      if (import.meta.client && isAbsoluteUrl(url)) {
+        window.location.assign(url)
+        return Promise.resolve()
+      }
+      return navigateTo(url)
+    }
     return isAbsoluteUrl(url) ? navigateTo(url, { external: true }) : navigateTo(url)
   }
 
@@ -82,6 +94,9 @@ export function useProfileUrl() {
 
   /** Props for NuxtLink when `to` may be a full https URL. */
   function linkTo(url: string) {
+    if (staysInGalleryApp(url)) {
+      return { to: url }
+    }
     return isAbsoluteUrl(url) ? { to: url, external: true as const } : { to: url }
   }
 
@@ -89,9 +104,12 @@ export function useProfileUrl() {
     return linkTo(profileUrl(username, path))
   }
 
-  /** External portfolio URL — opens in a new tab (e.g. Explore galleries). */
+  /** Opens portfolio in a new tab on web; same WebView on Capacitor. */
   function profileLinkNewTab(username: string, path = '/') {
     const url = profileUrl(username, path)
+    if (staysInGalleryApp(url)) {
+      return { to: url }
+    }
     if (isAbsoluteUrl(url)) {
       return {
         to: url,
@@ -104,7 +122,7 @@ export function useProfileUrl() {
   }
 
   function isExternalProfileUrl(username: string, path = '/') {
-    return isAbsoluteUrl(profileUrl(username, path))
+    return !staysInGalleryApp(profileUrl(username, path))
   }
 
   function tenantUsername(hostname?: string): string | null {

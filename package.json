@@ -19,10 +19,12 @@
     "mobile:release": "bash mobile/scripts/play-release.sh"
   },
   "dependencies": {
+    "@capacitor-firebase/authentication": "^7.5.0",
+    "@capacitor/app": "^7.1.2",
     "@capacitor/core": "^7.2.0",
     "@capacitor/status-bar": "^7.0.1",
-    "aws4fetch": "^1.0.20",
     "@vueuse/core": "^12.5.0",
+    "aws4fetch": "^1.0.20",
     "firebase": "^11.2.0",
     "jose": "^5.9.6",
     "nanoid": "^5.0.9",

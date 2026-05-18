@@ -1,0 +1,21 @@
+{
+  "project_info": {
+    "project_number": "964202837822",
+    "project_id": "loopgallery-9a4d7",
+    "storage_bucket": "loopgallery-9a4d7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "REPLACE_WITH_ANDROID_APP_ID",
+        "android_client_info": {
+          "package_name": "us.a_u.loopgallery.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [{ "current_key": "REPLACE_ME" }],
+      "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+    }
+  ],
+  "configuration_version": "1"
+}
