@@ -14,8 +14,12 @@
 </template>
 
 <script setup lang="ts">
-import { getRedirectResult, signInWithRedirect } from 'firebase/auth'
-import type { User } from 'firebase/auth'
+import {
+  getRedirectResult,
+  GoogleAuthProvider,
+  signInWithRedirect,
+  type UserCredential,
+} from 'firebase/auth'
 
 definePageMeta({ layout: false })
 
@@ -32,7 +36,7 @@ onMounted(async () => {
   try {
     const existing = await getRedirectResult($firebaseAuth)
     if (existing?.user) {
-      await finishWithToken(existing.user)
+      await finishWithOAuthCredential(existing)
       return
     }
 
@@ -45,10 +49,18 @@ onMounted(async () => {
   }
 })
 
-async function finishWithToken(user: User) {
+async function finishWithOAuthCredential(result: UserCredential) {
   status.value = 'Finishing sign-in…'
-  const idToken = await user.getIdToken()
-  const target = `/auth/complete#idToken=${encodeURIComponent(idToken)}`
-  window.location.replace(target)
+  const oauth = GoogleAuthProvider.credentialFromResult(result)
+  if (!oauth?.idToken && !oauth?.accessToken) {
+    error.value = 'Could not read Google credentials. Please try again.'
+    status.value = ''
+    return
+  }
+
+  const params = new URLSearchParams()
+  if (oauth.idToken) params.set('gid', oauth.idToken)
+  if (oauth.accessToken) params.set('gat', oauth.accessToken)
+  window.location.replace(`/auth/complete#${params.toString()}`)
 }
 </script>

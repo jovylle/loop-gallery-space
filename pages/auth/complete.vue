@@ -46,7 +46,8 @@ const returnUrl = computed(() => {
 onMounted(() => {
   if (import.meta.client) {
     const { isCapacitorNative } = useCapacitor()
-    showOpenApp.value = !isCapacitorNative() && window.location.hash.includes('idToken')
+    const hash = window.location.hash
+    showOpenApp.value = !isCapacitorNative() && (hash.includes('gid=') || hash.includes('gat='))
   }
   void completeSignIn()
 })
@@ -58,8 +59,11 @@ async function completeSignIn() {
   }
 
   const hash = import.meta.client ? window.location.hash.slice(1) : ''
-  const idToken = new URLSearchParams(hash).get('idToken')
-  if (!idToken) {
+  const params = new URLSearchParams(hash)
+  const googleIdToken = params.get('gid')
+  const googleAccessToken = params.get('gat')
+
+  if (!googleIdToken && !googleAccessToken) {
     if (showOpenApp.value) {
       status.value = 'Tap the button below to return to the app.'
       return
@@ -70,7 +74,8 @@ async function completeSignIn() {
   }
 
   try {
-    await signInWithCredential($firebaseAuth, GoogleAuthProvider.credential(idToken))
+    const credential = GoogleAuthProvider.credential(googleIdToken, googleAccessToken)
+    await signInWithCredential($firebaseAuth, credential)
     await refreshProfile()
     if (profile.value?.needsOnboarding) {
       await completeOnboarding()
@@ -80,6 +85,11 @@ async function completeSignIn() {
     status.value = 'Redirecting…'
     if (import.meta.client) {
       history.replaceState(null, '', '/auth/complete')
+      const { isCapacitorNative } = useCapacitor()
+      if (isCapacitorNative()) {
+        const { Browser } = await import('@capacitor/browser')
+        await Browser.close().catch(() => {})
+      }
     }
 
     const username = profile.value?.username
