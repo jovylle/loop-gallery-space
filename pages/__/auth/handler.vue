@@ -14,6 +14,8 @@
 </template>
 
 <script setup lang="ts">
+import { isFirebaseRedirectReturn } from '~/shared/auth-bridge'
+
 /**
  * Firebase redirect OAuth lands here after Google (not on /auth/mobile).
  * @see https://firebase.google.com/docs/auth/web/redirect-best-practices
@@ -33,7 +35,13 @@ onMounted(async () => {
     const done = await completePendingRedirect($firebaseAuth)
     if (done) return
 
-    error.value = 'No sign-in session found. Please try again from the app.'
+    if (isFirebaseRedirectReturn()) {
+      error.value =
+        'Google returned but sign-in could not finish. Close this tab, open the app, and try again.'
+    }
+    else {
+      error.value = 'No sign-in session found. Please try again from the app.'
+    }
     status.value = ''
   }
   catch (e) {

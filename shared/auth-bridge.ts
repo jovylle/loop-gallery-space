@@ -64,3 +64,10 @@ export function isLikelyGoogleIdToken(token: string | null | undefined): token i
   if (!token?.trim()) return false
   return token.trim().split('.').length === 3
 }
+
+/** True when the URL is Firebase redirecting back after Google OAuth (not a fresh visit). */
+export function isFirebaseRedirectReturn(): boolean {
+  if (typeof window === 'undefined') return false
+  const params = `${window.location.search}${window.location.hash}`
+  return /(?:^|[?&#])(apiKey|authType|mode)=/.test(params)
+}

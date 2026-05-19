@@ -14,12 +14,13 @@
 </template>
 
 <script setup lang="ts">
-import { signInWithRedirect } from 'firebase/auth'
+import { signInWithPopup } from 'firebase/auth'
+import { isFirebaseRedirectReturn } from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
 
 const { $firebaseAuth, $googleProvider } = useNuxtApp()
-const { status, error, completePendingRedirect } = useOAuthRedirectFinish()
+const { status, error, completePendingRedirect, finishWithOAuthCredential } = useOAuthRedirectFinish()
 
 onMounted(async () => {
   if (!$firebaseAuth || !$googleProvider) {
@@ -27,15 +28,29 @@ onMounted(async () => {
     return
   }
 
+  // Stale redirect return on the wrong path — forward to Firebase handler (avoid redirect loop).
+  if (isFirebaseRedirectReturn()) {
+    window.location.replace(`/__/auth/handler${window.location.search}${window.location.hash}`)
+    return
+  }
+
   try {
     const existing = await completePendingRedirect($firebaseAuth)
     if (existing) return
 
-    status.value = 'Redirecting to Google…'
-    await signInWithRedirect($firebaseAuth, $googleProvider)
+    // Custom Tab is real Chrome — popup avoids cross-domain redirect / getRedirectResult failures.
+    status.value = 'Opening Google…'
+    const result = await signInWithPopup($firebaseAuth, $googleProvider)
+    await finishWithOAuthCredential(result)
   }
   catch (e) {
-    error.value = e instanceof Error ? e.message : 'Sign in failed'
+    const code = e && typeof e === 'object' && 'code' in e ? String((e as { code: string }).code) : ''
+    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+      error.value = 'Google sign-in was blocked. Allow popups and try again.'
+    }
+    else {
+      error.value = e instanceof Error ? e.message : 'Sign in failed'
+    }
     status.value = 'Something went wrong.'
   }
 })
