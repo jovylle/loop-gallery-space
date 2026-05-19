@@ -4,7 +4,7 @@
       Sign in
     </p>
     <h1 class="text-2xl font-semibold mb-2">
-      Continue with Google
+      Completing sign-in
     </h1>
     <p class="text-[var(--text-muted)] text-sm max-w-sm mb-6">
       {{ status }}
@@ -14,25 +14,27 @@
 </template>
 
 <script setup lang="ts">
-import { signInWithRedirect } from 'firebase/auth'
-
+/**
+ * Firebase redirect OAuth lands here after Google (not on /auth/mobile).
+ * @see https://firebase.google.com/docs/auth/web/redirect-best-practices
+ */
 definePageMeta({ layout: false })
 
-const { $firebaseAuth, $googleProvider } = useNuxtApp()
+const { $firebaseAuth } = useNuxtApp()
 const { status, error, completePendingRedirect } = useOAuthRedirectFinish()
 
 onMounted(async () => {
-  if (!$firebaseAuth || !$googleProvider) {
+  if (!$firebaseAuth) {
     error.value = 'Firebase is not configured.'
     return
   }
 
   try {
-    const existing = await completePendingRedirect($firebaseAuth)
-    if (existing) return
+    const done = await completePendingRedirect($firebaseAuth)
+    if (done) return
 
-    status.value = 'Redirecting to Google…'
-    await signInWithRedirect($firebaseAuth, $googleProvider)
+    error.value = 'No sign-in session found. Please try again from the app.'
+    status.value = ''
   }
   catch (e) {
     error.value = e instanceof Error ? e.message : 'Sign in failed'
