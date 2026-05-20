@@ -13,3 +13,6 @@ export const firebaseWebConfig = {
 } as const
 
 export const firebaseProjectId = firebaseWebConfig.projectId
+
+/** Default Firebase Hosting origin (proxy /__/auth/* here when not using Firebase Hosting). */
+export const firebaseHostingOrigin = `https://${firebaseWebConfig.projectId}.firebaseapp.com`
