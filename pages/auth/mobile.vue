@@ -30,14 +30,33 @@ onMounted(async () => {
 
   try {
     const done = await completePendingRedirect($firebaseAuth)
-    if (done) return
-
-    // Google returned but tokens were not applied — send through Firebase handler (proxied on our domain).
-    if (isFirebaseRedirectReturn()) {
-      window.location.replace(`/__/auth/handler${window.location.search}${window.location.hash}`)
+    if (done) {
+      sessionStorage.removeItem('lg-oauth-handler-tried')
       return
     }
 
+    const q = window.location.search
+    const h = window.location.hash
+    const params = new URLSearchParams(q.startsWith('?') ? q.slice(1) : q)
+
+    // Google returned on /auth/mobile — finish on /__/auth/handler (once).
+    if (isFirebaseRedirectReturn()) {
+      if (params.get('authType') === 'signInViaPopup') {
+        sessionStorage.removeItem('lg-oauth-handler-tried')
+        window.location.replace('/auth/mobile')
+        return
+      }
+      if (sessionStorage.getItem('lg-oauth-handler-tried') === '1') {
+        error.value = 'Sign-in could not finish. Close this tab, open the app, and try again.'
+        status.value = ''
+        return
+      }
+      sessionStorage.setItem('lg-oauth-handler-tried', '1')
+      window.location.replace(`/__/auth/handler${q}${h}`)
+      return
+    }
+
+    sessionStorage.removeItem('lg-oauth-handler-tried')
     status.value = 'Redirecting to Google…'
     await signInWithRedirect($firebaseAuth, $googleProvider)
   }

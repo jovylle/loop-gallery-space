@@ -1,4 +1,4 @@
-import { firebaseHostingOrigin, firebaseWebConfig } from './shared/firebase.config'
+import { firebaseWebConfig } from './shared/firebase.config'
 
 const firebaseAuthDomain =
   process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || firebaseWebConfig.authDomain
@@ -79,9 +79,7 @@ export default defineNuxtConfig({
     '/dashboard/**': { ssr: false },
     '/login': { ssr: false },
     '/auth/**': { ssr: false },
-    // Firebase redirect sign-in helper (required on custom domain — see Firebase redirect best practices).
-    '/__/auth/**': { proxy: `${firebaseHostingOrigin}/__/auth/**` },
-    '/__/firebase/**': { proxy: `${firebaseHostingOrigin}/__/firebase/**` },
+    '/__/auth/**': { ssr: false },
     '/privacy': { prerender: true },
     '/account/delete': { prerender: true },
   },

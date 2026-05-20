@@ -69,5 +69,5 @@ export function isLikelyGoogleIdToken(token: string | null | undefined): token i
 export function isFirebaseRedirectReturn(): boolean {
   if (typeof window === 'undefined') return false
   const params = `${window.location.search}${window.location.hash}`
-  return /(?:^|[?&#])(apiKey|authType|mode)=/.test(params)
+  return /(?:^|[?&#])(apiKey|authType|mode|eventId)=/.test(params)
 }
