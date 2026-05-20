@@ -15,11 +15,13 @@
 </template>
 
 <script setup lang="ts">
-import { isFirebaseRedirectReturn, isOAuthReturnFromGoogle } from '~/shared/auth-bridge'
+import { isOAuthReturnFromGoogle } from '~/shared/auth-bridge'
+import { firebaseHostingOrigin } from '~/shared/firebase.config'
 
 definePageMeta({ layout: false })
 
 const OAUTH_SESSION_KEY = 'lg-oauth-session'
+const FIREBASE_HOP_KEY = 'lg-oauth-firebase-hop'
 
 const { $firebaseAuth } = useNuxtApp()
 const { status, error, completePendingRedirect, debug } = useOAuthRedirectFinish('handler')
@@ -31,8 +33,8 @@ onMounted(async () => {
   debug.snapshotOAuthQuery()
   debug.snapshotClient()
   debug.snapshotFirebase()
-  debug.log(`isFirebaseRedirectReturn: ${isFirebaseRedirectReturn()}`)
   debug.log(`isOAuthReturnFromGoogle: ${isOAuthReturnFromGoogle()}`)
+  debug.log(`session ${FIREBASE_HOP_KEY}: ${sessionStorage.getItem(FIREBASE_HOP_KEY) ?? '(unset)'}`)
 
   if (!$firebaseAuth) {
     error.value = 'Firebase is not configured.'
@@ -55,8 +57,23 @@ onMounted(async () => {
     const done = await completePendingRedirect($firebaseAuth)
     if (done) {
       sessionStorage.removeItem(OAUTH_SESSION_KEY)
+      sessionStorage.removeItem(FIREBASE_HOP_KEY)
       debug.log('SUCCESS: redirecting to /auth/complete')
       return
+    }
+
+    // Pre-Google hop: Firebase lands here before accounts.google.com. Our page must not
+    // stop the chain — forward once to Firebase’s hosted handler (it redirects to Google).
+    if (authType === 'signInViaRedirect' && !isOAuthReturnFromGoogle()) {
+      if (sessionStorage.getItem(FIREBASE_HOP_KEY) !== '1') {
+        sessionStorage.setItem(FIREBASE_HOP_KEY, '1')
+        const target = `${firebaseHostingOrigin}/__/auth/handler${window.location.search}${window.location.hash}`
+        status.value = 'Continuing to Google…'
+        debug.log(`pre-Google hop → ${debug.redactUrl(target)}`)
+        window.location.replace(target)
+        return
+      }
+      debug.log('pre-Google hop: already forwarded to firebaseapp.com')
     }
 
     error.value =

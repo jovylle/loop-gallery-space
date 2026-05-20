@@ -53,6 +53,8 @@ export function useOAuthRedirectFinish(screen = 'oauth') {
     }
     const target = `/auth/complete${query}`
     debug.log(`redirect → ${debug.redactUrl(`${window.location.origin}${target}`)}`)
+    sessionStorage.removeItem('lg-oauth-session')
+    sessionStorage.removeItem('lg-oauth-firebase-hop')
     window.location.replace(target)
     return true
   }
