@@ -15,9 +15,10 @@
 
 <script setup lang="ts">
 import { signInWithRedirect } from 'firebase/auth'
-import { isFirebaseRedirectReturn } from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
+
+const OAUTH_SESSION_KEY = 'lg-oauth-session'
 
 const { $firebaseAuth, $googleProvider } = useNuxtApp()
 const { status, error, completePendingRedirect } = useOAuthRedirectFinish()
@@ -31,36 +32,22 @@ onMounted(async () => {
   try {
     const done = await completePendingRedirect($firebaseAuth)
     if (done) {
-      sessionStorage.removeItem('lg-oauth-handler-tried')
+      sessionStorage.removeItem(OAUTH_SESSION_KEY)
       return
     }
 
-    const q = window.location.search
-    const h = window.location.hash
-    const params = new URLSearchParams(q.startsWith('?') ? q.slice(1) : q)
-
-    // Google returned on /auth/mobile — finish on /__/auth/handler (once).
-    if (isFirebaseRedirectReturn()) {
-      if (params.get('authType') === 'signInViaPopup') {
-        sessionStorage.removeItem('lg-oauth-handler-tried')
-        window.location.replace('/auth/mobile')
-        return
-      }
-      if (sessionStorage.getItem('lg-oauth-handler-tried') === '1') {
-        error.value = 'Sign-in could not finish. Close this tab, open the app, and try again.'
-        status.value = ''
-        return
-      }
-      sessionStorage.setItem('lg-oauth-handler-tried', '1')
-      window.location.replace(`/__/auth/handler${q}${h}`)
+    if (sessionStorage.getItem(OAUTH_SESSION_KEY) === '1') {
+      error.value = 'Sign-in did not finish. Close this tab, open the app, and try again.'
+      status.value = ''
       return
     }
 
-    sessionStorage.removeItem('lg-oauth-handler-tried')
+    sessionStorage.setItem(OAUTH_SESSION_KEY, '1')
     status.value = 'Redirecting to Google…'
     await signInWithRedirect($firebaseAuth, $googleProvider)
   }
   catch (e) {
+    sessionStorage.removeItem(OAUTH_SESSION_KEY)
     error.value = e instanceof Error ? e.message : 'Sign in failed'
     status.value = 'Something went wrong.'
   }
