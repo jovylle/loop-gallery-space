@@ -14,29 +14,30 @@
 </template>
 
 <script setup lang="ts">
+import { signInWithRedirect } from 'firebase/auth'
+import { isOAuthReturnFromGoogle } from '~/shared/auth-bridge'
+
 /**
- * Firebase lands here after Google OAuth. Must call getRedirectResult on this URL.
+ * Firebase redirect OAuth lands here (before and after Google).
+ * @see https://firebase.google.com/docs/auth/web/redirect-best-practices
  */
 definePageMeta({ layout: false })
 
-const { $firebaseAuth } = useNuxtApp()
+const { $firebaseAuth, $googleProvider } = useNuxtApp()
 const { status, error, completePendingRedirect } = useOAuthRedirectFinish()
 
 onMounted(async () => {
-  if (!$firebaseAuth) {
+  if (!$firebaseAuth || !$googleProvider) {
     error.value = 'Firebase is not configured.'
     return
   }
 
   const authType = new URLSearchParams(window.location.search).get('authType')
 
-  // Leftover popup flow (blocked in Custom Tab) — cannot finish on this URL.
   if (authType === 'signInViaPopup') {
     error.value = 'Popup sign-in did not finish. Close this tab, open the app, and try again.'
     status.value = ''
-    window.setTimeout(() => {
-      window.location.replace('/auth/mobile')
-    }, 2500)
+    window.setTimeout(() => window.location.replace('/auth/mobile'), 2500)
     return
   }
 
@@ -48,7 +49,15 @@ onMounted(async () => {
       return
     }
 
-    error.value = 'Could not complete sign-in. Close this tab and try again from the app.'
+    // Pre-Google hop (your URL shape) — continue to Google; not an error yet.
+    if (authType === 'signInViaRedirect' && !isOAuthReturnFromGoogle()) {
+      status.value = 'Redirecting to Google…'
+      await signInWithRedirect($firebaseAuth, $googleProvider)
+      return
+    }
+
+    error.value =
+      'Could not complete sign-in. Add https://loopgallery.a-u.us/__/auth/handler to Google OAuth redirect URIs, then try again from the app.'
     status.value = ''
   }
   catch (e) {

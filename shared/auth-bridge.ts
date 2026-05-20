@@ -71,3 +71,10 @@ export function isFirebaseRedirectReturn(): boolean {
   const params = `${window.location.search}${window.location.hash}`
   return /(?:^|[?&#])(apiKey|authType|mode|eventId)=/.test(params)
 }
+
+/** True when Google has redirected back with an authorization response (not the pre-Google hop). */
+export function isOAuthReturnFromGoogle(): boolean {
+  if (typeof window === 'undefined') return false
+  const params = `${window.location.search}${window.location.hash}`
+  return /(?:^|[?&#&])(code|state|access_token|id_token)=/.test(params)
+}
