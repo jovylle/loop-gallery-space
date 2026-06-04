@@ -45,10 +45,13 @@ onMounted(async () => {
   const authType = new URLSearchParams(window.location.search).get('authType')
   debug.log(`authType: ${authType ?? '(none)'}`)
 
+  // Popup OAuth must run Firebase's hosted handler (postMessage to opener). Our Nuxt page only
+  // finishes redirect flows for Custom Tab /auth/mobile — same hop as pre-Google redirect.
   if (authType === 'signInViaPopup') {
-    error.value = 'Popup sign-in did not finish. Close this tab, open the app, and try again.'
-    status.value = ''
-    debug.log('FAIL: signInViaPopup in Custom Tab')
+    const target = `${firebaseHostingOrigin}/__/auth/handler${window.location.search}${window.location.hash}`
+    status.value = 'Completing sign-in…'
+    debug.log(`popup hop → ${debug.redactUrl(target)}`)
+    window.location.replace(target)
     return
   }
 
