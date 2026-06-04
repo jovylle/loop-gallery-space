@@ -1,5 +1,6 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import {
+  browserPopupRedirectResolver,
   getAuth,
   GoogleAuthProvider,
   initializeAuth,
@@ -15,7 +16,10 @@ async function createAuth(firebaseApp: FirebaseApp): Promise<Auth> {
     const { Capacitor } = await import('@capacitor/core')
     if (Capacitor.isNativePlatform()) {
       try {
-        return initializeAuth(firebaseApp, { persistence: indexedDBLocalPersistence })
+        return initializeAuth(firebaseApp, {
+          persistence: indexedDBLocalPersistence,
+          popupRedirectResolver: browserPopupRedirectResolver,
+        })
       }
       catch {
         return getAuth(firebaseApp)

@@ -16,7 +16,8 @@
     "mobile:sync": "npm run sync --prefix mobile",
     "mobile:android": "npm run open:android --prefix mobile",
     "mobile:assets": "npm run assets:generate --prefix mobile",
-    "mobile:release": "bash mobile/scripts/play-release.sh"
+    "mobile:release": "bash mobile/scripts/play-release.sh",
+    "mobile:apk": "bash mobile/scripts/build-apk.sh"
   },
   "dependencies": {
     "@capacitor-firebase/authentication": "^7.5.0",

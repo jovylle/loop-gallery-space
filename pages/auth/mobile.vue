@@ -41,6 +41,17 @@ onMounted(async () => {
     return
   }
 
+  const { isCapacitorNative } = useCapacitor()
+  // OAuth must run in Chrome Custom Tab (no Capacitor bridge). Emulator/in-app loads can land here in the WebView.
+  if (isCapacitorNative()) {
+    status.value = 'Opening sign-in in Chrome…'
+    debug.log('WebView detected → opening Custom Tab for /auth/mobile')
+    const { Browser } = await import('@capacitor/browser')
+    await Browser.open({ url: `${window.location.origin}/auth/mobile` })
+    status.value = 'Continue in the Chrome tab…'
+    return
+  }
+
   try {
     const done = await completePendingRedirect($firebaseAuth)
     if (done) {
