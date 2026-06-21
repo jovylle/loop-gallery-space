@@ -1,4 +1,4 @@
-/** On-screen OAuth debug log (auth/mobile, /__/auth/handler, /auth/complete). */
+/** On-screen OAuth debug log (auth/mobile, /auth/complete). */
 export function useAuthDebug(screen: string) {
   const lines = useState<string[]>('auth-debug-lines', () => [])
 

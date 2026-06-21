@@ -6,7 +6,7 @@
  */
 export const firebaseWebConfig = {
   apiKey: 'AIzaSyAAGcGQbbiC-qXtbGEc5hF32m6rCHar1DM',
-  /** Must match the site host so redirect OAuth can complete on /__/auth/handler. */
+  /** Must match the site host; /__/auth/* is proxied to firebaseapp.com for redirect OAuth. */
   authDomain: 'loopgallery.a-u.us',
   projectId: 'loopgallery-9a4d7',
   appId: '1:964202837822:web:1053c48e43196d6b151e6f',

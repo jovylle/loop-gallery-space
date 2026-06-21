@@ -93,7 +93,7 @@ export function useAuth() {
     else sessionStorage.removeItem(OAUTH_WEB_NEXT_KEY)
   }
 
-  /** Finish browser redirect sign-in on /__/auth/handler (not the mobile token bridge). */
+  /** Finish browser redirect sign-in after Google returns to /login. */
   async function finishWebRedirectSignIn(): Promise<string | null> {
     if (!$firebaseAuth || !import.meta.client) return null
     if (sessionStorage.getItem(OAUTH_WEB_SESSION_KEY) !== '1') return null
@@ -128,7 +128,7 @@ export function useAuth() {
       await signInWithGoogleBrowser()
       return
     }
-    // Popup OAuth breaks on our custom /__/auth/handler (auth/popup-closed-by-user).
+    // Redirect OAuth needs /__/auth/* proxied to firebaseapp.com on our custom domain.
     markWebOAuthIntent(next)
     await signInWithRedirect($firebaseAuth, $googleProvider)
   }

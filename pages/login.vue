@@ -25,12 +25,23 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
-const { signInWithGoogle, signInWithGoogleBrowser, user, profile, loading, isConfigured } = useAuth()
+const { signInWithGoogle, signInWithGoogleBrowser, user, profile, loading, isConfigured, finishWebRedirectSignIn } = useAuth()
 const route = useRoute()
 const { navigateToHref, resolvePostLoginPath } = useProfileUrl()
 const signingIn = ref(false)
 const error = ref('')
 const { isCapacitorNative } = useCapacitor()
+
+onMounted(async () => {
+  if (isCapacitorNative()) return
+  try {
+    const path = await finishWebRedirectSignIn()
+    if (path) await navigateToHref(path)
+  }
+  catch (e) {
+    error.value = e instanceof Error ? e.message : 'Sign in failed'
+  }
+})
 
 const signingInLabel = computed(() => {
   if (!signingIn.value) return 'Continue with Google'
