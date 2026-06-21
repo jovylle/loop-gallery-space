@@ -6,17 +6,33 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ANDROID="$ROOT/mobile/android"
 KEYSTORE_PROPS="$ANDROID/keystore.properties"
 GS_JSON="$ANDROID/app/google-services.json"
-JDK_HOME="${JAVA_HOME:-$ROOT/mobile/.jdk/jdk-21.0.7+6/Contents/Home}"
+BUNDLED_JDK="$ROOT/mobile/.jdk/jdk-21.0.7+6/Contents/Home"
+SYSTEM_JDK="/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home"
+if [[ -n "${JAVA_HOME:-}" && -d "$JAVA_HOME" ]]; then
+  JDK_HOME="$JAVA_HOME"
+elif [[ -d "$BUNDLED_JDK" ]]; then
+  JDK_HOME="$BUNDLED_JDK"
+elif [[ -d "$SYSTEM_JDK" ]]; then
+  JDK_HOME="$SYSTEM_JDK"
+else
+  echo "ERROR: JDK 21 not found. Install Temurin 21 or set JAVA_HOME."
+  exit 1
+fi
 ANDROID_SDK="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetools}"
 
 export JAVA_HOME="$JDK_HOME"
 export ANDROID_HOME="$ANDROID_SDK"
-export PATH="/opt/homebrew/opt/node@22/bin:/opt/homebrew/opt/node@20/bin:$PATH"
+# Prefer the caller's Node (e.g. nvm). Homebrew node@20 can break on icu4c upgrades.
+if [[ -z "${NODE_BIN_DIR:-}" ]]; then
+  NODE_BIN_DIR="$(dirname "$(command -v node)")"
+fi
+export PATH="$NODE_BIN_DIR:$PATH"
 
 if [[ ! -f "$GS_JSON" ]]; then
-  echo "ERROR: missing $GS_JSON"
-  echo "Download from Firebase → Android app (us.a_u.loopgallery.app) and re-run."
-  exit 1
+  echo "WARN: missing $GS_JSON — native Google Sign-In will not work in this build."
+  echo "      Custom Tab OAuth still works (app loads https://loopgallery.a-u.us)."
+  echo "      Download from Firebase → Android app (us.a_u.loopgallery.app) for native sign-in."
+  echo ""
 fi
 
 echo "→ Capacitor sync"
@@ -52,7 +68,7 @@ fi
 
 cp "$AAB" "$OUT"
 echo ""
-echo "Play Console → Production → Create new release → Upload:"
+echo "Play Console → Testing → Closed testing → Create new release → Upload:"
 echo "  $OUT"
 ls -lh "$OUT"
 echo ""
