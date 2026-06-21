@@ -20,7 +20,6 @@
     >
       Open LoopGallery app
     </a>
-    <AuthDebugPanel />
   </div>
 </template>
 
@@ -39,7 +38,6 @@ const { $firebaseAuth } = useNuxtApp()
 const { profile, refreshProfile, completeOnboarding } = useAuth()
 const { navigateToHref, resolvePostLoginPath } = useProfileUrl()
 const route = useRoute()
-const debug = useAuthDebug('complete')
 
 const status = ref('Securing your session…')
 const error = ref('')
@@ -50,21 +48,20 @@ let finishing = false
 const returnUrl = ref('/auth/complete')
 const openAppHref = ref('/auth/complete')
 
+function formatFirebaseError(e: unknown): string {
+  if (e && typeof e === 'object') {
+    const o = e as { code?: string, message?: string }
+    return [o.code, o.message].filter(Boolean).join(' — ') || String(e)
+  }
+  return e instanceof Error ? e.message : String(e)
+}
+
 onMounted(() => {
-  debug.clear()
-  debug.log('complete mounted')
   if (import.meta.client) {
     const href = window.location.href
     returnUrl.value = href
     openAppHref.value = buildAndroidAppLinkIntent(href)
     showOpenApp.value = isOAuthBrowserHandoffContext() && (href.includes('gid=') || href.includes('gat='))
-    debug.snapshotUrl()
-    debug.snapshotClient()
-    debug.snapshotFirebase()
-    debug.log(`showOpenApp button: ${showOpenApp.value}`)
-    const tokens = readOAuthBridgeTokens()
-    debug.log(`bridge gid: ${tokens.googleIdToken ? `yes (${tokens.googleIdToken.length})` : 'no'}`)
-    debug.log(`bridge gat: ${tokens.googleAccessToken ? 'yes' : 'no'}`)
   }
   void completeSignIn()
 })
@@ -75,7 +72,6 @@ async function completeSignIn() {
 
   if (!$firebaseAuth) {
     error.value = 'Firebase is not configured.'
-    debug.log('FAIL: no $firebaseAuth')
     finishing = false
     return
   }
@@ -87,12 +83,10 @@ async function completeSignIn() {
   if (!googleIdToken && !googleAccessToken) {
     if (showOpenApp.value) {
       status.value = 'Tap the button below to return to the app.'
-      debug.log('no tokens but showOpenApp — waiting for user tap')
     }
     else {
       error.value = 'Missing sign-in token. Please try again from the app.'
       status.value = ''
-      debug.log('FAIL: no gid/gat in URL')
     }
     finishing = false
     return
@@ -102,7 +96,6 @@ async function completeSignIn() {
   if (isOAuthBrowserHandoffContext()) {
     showOpenApp.value = true
     status.value = 'Return to LoopGallery to finish signing in.'
-    debug.log('Custom Tab handoff — waiting for App Link / Open app tap')
     finishing = false
     window.setTimeout(() => {
       window.location.assign(openAppHref.value)
@@ -118,27 +111,19 @@ async function completeSignIn() {
       if (!isLikelyGoogleIdToken(idToken) && !accessToken) {
         error.value = 'Sign-in token was invalid or corrupted. Please try again from the app.'
         status.value = ''
-        debug.log('FAIL: token shape invalid')
         finishing = false
         return
       }
 
-      debug.log('signInWithCredential (WebView)…')
       const credential = isLikelyGoogleIdToken(idToken)
         ? GoogleAuthProvider.credential(idToken, accessToken || undefined)
         : GoogleAuthProvider.credential(null, accessToken)
       await signInWithCredential($firebaseAuth, credential)
-      debug.log(`credential OK uid=${$firebaseAuth.currentUser?.uid ?? '?'}`)
-    }
-    else {
-      debug.log(`already signed in uid=${$firebaseAuth.currentUser.uid}`)
     }
 
     await refreshProfile()
-    debug.log(`profile username: ${profile.value?.username ?? '(none)'}`)
     if (profile.value?.needsOnboarding) {
       await completeOnboarding()
-      debug.log('onboarding done')
     }
 
     done.value = true
@@ -147,13 +132,9 @@ async function completeSignIn() {
     if (import.meta.client) {
       history.replaceState(null, '', '/auth/complete')
       const { isCapacitorNative } = useCapacitor()
-      debug.log(`capacitor native before close: ${isCapacitorNative()}`)
       if (isCapacitorNative()) {
         const { Browser } = await import('@capacitor/browser')
-        await Browser.close().catch((e) => {
-          debug.log(`Browser.close: ${debug.firebaseError(e)}`)
-        })
-        debug.log('Browser.close called')
+        await Browser.close().catch(() => {})
       }
     }
 
@@ -161,21 +142,18 @@ async function completeSignIn() {
     if (username) {
       const next = typeof route.query.next === 'string' ? route.query.next : undefined
       const path = resolvePostLoginPath(next, username)
-      debug.log(`navigate → ${path}`)
       await navigateToHref(path)
       return
     }
 
-    debug.log('navigate → /dashboard')
     await navigateTo('/dashboard')
   }
   catch (e) {
-    const msg = debug.firebaseError(e)
+    const msg = formatFirebaseError(e)
     error.value = msg.includes('auth/')
       ? `Sign-in failed (${msg}). Close the app and try again.`
       : msg
     status.value = ''
-    debug.log(`FAIL: ${msg}`)
     finishing = false
   }
 }
