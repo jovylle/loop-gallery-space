@@ -18,7 +18,8 @@
     "mobile:assets": "npm run assets:generate --prefix mobile",
     "mobile:release": "bash mobile/scripts/play-release.sh",
     "mobile:apk": "bash mobile/scripts/build-apk.sh",
-    "mobile:native-auth": "bash mobile/scripts/setup-native-auth.sh"
+    "mobile:native-auth": "bash mobile/scripts/setup-native-auth.sh",
+    "mobile:find-keystore": "bash mobile/scripts/find-upload-keystore.sh"
   },
   "dependencies": {
     "@capacitor-firebase/authentication": "^7.5.0",
