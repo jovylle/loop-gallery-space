@@ -23,6 +23,7 @@ fi
 
 export JAVA_HOME="$JDK_HOME"
 export ANDROID_HOME="$ANDROID_SDK"
+export PATH="/opt/homebrew/opt/node@22/bin:/opt/homebrew/opt/node@20/bin:$PATH"
 
 echo "→ Capacitor sync"
 npm run mobile:sync --prefix "$ROOT"
