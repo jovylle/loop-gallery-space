@@ -19,7 +19,8 @@
     "mobile:release": "bash mobile/scripts/play-release.sh",
     "mobile:apk": "bash mobile/scripts/build-apk.sh",
     "mobile:native-auth": "bash mobile/scripts/setup-native-auth.sh",
-    "mobile:find-keystore": "bash mobile/scripts/find-upload-keystore.sh"
+    "mobile:find-keystore": "bash mobile/scripts/find-upload-keystore.sh",
+    "mobile:check-signing": "bash mobile/scripts/check-signing.sh"
   },
   "dependencies": {
     "@capacitor-firebase/authentication": "^7.5.0",

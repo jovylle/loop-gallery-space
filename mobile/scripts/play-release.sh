@@ -41,11 +41,8 @@ npm run mobile:sync --prefix "$ROOT"
 if [[ ! -f "$KEYSTORE_PROPS" ]]; then
   echo ""
   echo "Release signing not configured (building UNSIGNED AAB)."
-  echo "For updates after first Play upload you need the same upload keystore:"
-  echo "  1. keytool -genkey -v -keystore $ROOT/mobile/loopgallery-release.keystore \\"
-  echo "       -alias loopgallery -keyalg RSA -keysize 2048 -validity 10000"
-  echo "  2. cp mobile/android/keystore.properties.example mobile/android/keystore.properties"
-  echo "  3. Re-run: npm run mobile:release"
+  echo "See mobile/ANDROID_BUILD.md — copy loopgallery-release.keystore + keystore.properties"
+  echo "from another machine, then: npm run mobile:check-signing && npm run mobile:release"
   echo ""
 fi
 

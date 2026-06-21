@@ -9,8 +9,7 @@
 set -euo pipefail
 
 EXPECTED_SHA1="${EXPECTED_SHA1:-3E:4E:B5:FB:14:E7:F9:EB:FA:E6:93:04:E9:B7:4D:E7:0C:6E:BB:BF}"
-EXPECTED_NORM="${EXPECTED_SHA1//:/}"
-EXPECTED_NORM="${EXPECTED_NORM^^}"
+EXPECTED_NORM="$(echo "${EXPECTED_SHA1//:/}" | tr '[:lower:]' '[:upper:]')"
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 JAVA_HOME="${JAVA_HOME:-$ROOT/mobile/.jdk/jdk-21.0.7+6/Contents/Home}"

@@ -72,6 +72,19 @@ Run D1 migrations once locally: `npm run db:migrate:prod`
 
 Merge to `master` → build + deploy run automatically.
 
+## Android app (Capacitor)
+
+The Play Store APK is a thin shell around the live site. Web changes deploy with Cloudflare; native rebuilds are for Android packaging or plugin changes.
+
+```bash
+npm run mobile:install
+npm run mobile:check-signing   # verify Play upload keystore before building
+npm run mobile:release         # signed AAB → mobile/dist/LoopGallery-release.aab
+npm run mobile:apk             # debug APK for sideloading (do not upload to Play)
+```
+
+**New machine:** `git pull` is not enough — copy the gitignored upload keystore and `keystore.properties` from a machine that already ships to Play. See **[mobile/ANDROID_BUILD.md](mobile/ANDROID_BUILD.md)** for setup, signing keys, and closed-testing uploads.
+
 ### Manual deploy
 
 ```bash
