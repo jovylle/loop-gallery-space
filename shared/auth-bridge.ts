@@ -87,3 +87,23 @@ export function isOAuthReturnFromGoogle(): boolean {
   const params = `${window.location.search}${window.location.hash}`
   return /(?:^|[?&#&])(code|state|access_token|id_token)=/.test(params)
 }
+
+const ANDROID_APP_PACKAGE = 'us.a_u.loopgallery.app'
+
+/** Chrome Custom Tab → APK handoff via verified App Link / intent URL. */
+export function buildAndroidAppLinkIntent(
+  httpsUrl: string,
+  packageName = ANDROID_APP_PACKAGE,
+): string {
+  const url = new URL(httpsUrl)
+  const hostPathQuery = `${url.host}${url.pathname}${url.search}`
+  const fallback = encodeURIComponent(httpsUrl)
+  return `intent://${hostPathQuery}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${fallback};end`
+}
+
+/** True in Chrome Custom Tab (OAuth), false in the Capacitor WebView. */
+export function isOAuthBrowserHandoffContext(): boolean {
+  if (typeof window === 'undefined') return false
+  const cap = (window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
+  return !cap?.isNativePlatform?.()
+}

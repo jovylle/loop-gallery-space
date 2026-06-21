@@ -15,7 +15,7 @@
     </NuxtLink>
     <a
       v-if="showOpenApp && !done && !error"
-      :href="returnUrl"
+      :href="openAppHref"
       class="btn-primary mb-4"
     >
       Open LoopGallery app
@@ -26,7 +26,12 @@
 
 <script setup lang="ts">
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth'
-import { isLikelyGoogleIdToken, readOAuthBridgeTokens } from '~/shared/auth-bridge'
+import {
+  buildAndroidAppLinkIntent,
+  isLikelyGoogleIdToken,
+  isOAuthBrowserHandoffContext,
+  readOAuthBridgeTokens,
+} from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
 
@@ -43,15 +48,16 @@ const showOpenApp = ref(false)
 let finishing = false
 
 const returnUrl = ref('/auth/complete')
+const openAppHref = ref('/auth/complete')
 
 onMounted(() => {
   debug.clear()
   debug.log('complete mounted')
   if (import.meta.client) {
-    const { isCapacitorNative } = useCapacitor()
     const href = window.location.href
     returnUrl.value = href
-    showOpenApp.value = !isCapacitorNative() && (href.includes('gid=') || href.includes('gat='))
+    openAppHref.value = buildAndroidAppLinkIntent(href)
+    showOpenApp.value = isOAuthBrowserHandoffContext() && (href.includes('gid=') || href.includes('gat='))
     debug.snapshotUrl()
     debug.snapshotClient()
     debug.snapshotFirebase()
@@ -89,6 +95,18 @@ async function completeSignIn() {
       debug.log('FAIL: no gid/gat in URL')
     }
     finishing = false
+    return
+  }
+
+  // Chrome Custom Tab: do not sign in here — hand tokens to the APK WebView via App Link.
+  if (isOAuthBrowserHandoffContext()) {
+    showOpenApp.value = true
+    status.value = 'Return to LoopGallery to finish signing in.'
+    debug.log('Custom Tab handoff — waiting for App Link / Open app tap')
+    finishing = false
+    window.setTimeout(() => {
+      window.location.assign(openAppHref.value)
+    }, 600)
     return
   }
 

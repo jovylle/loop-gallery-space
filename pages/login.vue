@@ -25,7 +25,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
-const { signInWithGoogle, signInWithGoogleBrowser, user, profile, loading, isConfigured, finishWebRedirectSignIn } = useAuth()
+const { signInWithGoogle, user, profile, loading, isConfigured, finishWebRedirectSignIn } = useAuth()
 const route = useRoute()
 const { navigateToHref, resolvePostLoginPath } = useProfileUrl()
 const signingIn = ref(false)
@@ -45,7 +45,7 @@ onMounted(async () => {
 
 const signingInLabel = computed(() => {
   if (!signingIn.value) return 'Continue with Google'
-  if (isCapacitorNative()) return 'Continue in the browser…'
+  if (isCapacitorNative()) return 'Signing in…'
   return 'Setting up your space…'
 })
 
@@ -70,10 +70,6 @@ async function handleSignIn() {
   error.value = ''
   signingIn.value = true
   try {
-    if (isCapacitorNative()) {
-      await signInWithGoogleBrowser()
-      return
-    }
     const next = typeof route.query.next === 'string' ? route.query.next : undefined
     await signInWithGoogle(next)
   }
@@ -84,10 +80,7 @@ async function handleSignIn() {
       : msg
   }
   finally {
-    const { isCapacitorNative } = useCapacitor()
-    if (!isCapacitorNative()) {
-      signingIn.value = false
-    }
+    signingIn.value = false
   }
 }
 </script>

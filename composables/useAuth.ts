@@ -58,6 +58,12 @@ export function useAuth() {
     return profile.value
   }
 
+  function isNativeGoogleSignInCancelled(error: unknown): boolean {
+    const msg = error instanceof Error ? error.message : String(error)
+    return /cancel/i.test(msg)
+  }
+
+  /** Native Google account picker (needs google-services.json + SHA-1 in Firebase). */
   async function signInWithGoogleNative() {
     if (!$firebaseAuth) throw new Error('Firebase not configured')
     const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication')
@@ -122,11 +128,17 @@ export function useAuth() {
       throw new Error('Firebase not configured')
     }
     const { isCapacitorNative } = useCapacitor()
-    // Always use Chrome Custom Tabs on Android — WebView OAuth gets disallowed_useragent.
-    // Native Firebase auth only when google-services.json is configured (see signInWithGoogleNative).
     if (isCapacitorNative()) {
-      await signInWithGoogleBrowser()
-      return
+      try {
+        await signInWithGoogleNative()
+        return
+      }
+      catch (e) {
+        if (isNativeGoogleSignInCancelled(e)) throw e
+        console.warn('[LoopGallery] Native Google sign-in unavailable, using Chrome Custom Tab', e)
+        await signInWithGoogleBrowser()
+        return
+      }
     }
     // Redirect OAuth needs /__/auth/* proxied to firebaseapp.com on our custom domain.
     markWebOAuthIntent(next)
@@ -161,6 +173,9 @@ export function useAuth() {
     void import('@capacitor/app').then(({ App }) => {
       App.addListener('appUrlOpen', ({ url }) => {
         if (!isSameGalleryAppUrl(url, galleryHost)) return
+        void import('@capacitor/browser').then(({ Browser }) => {
+          Browser.close().catch(() => {})
+        })
         window.location.assign(url)
       })
       App.addListener('resume', () => {
