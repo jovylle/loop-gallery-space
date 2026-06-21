@@ -63,13 +63,14 @@ async function handleSignIn() {
       await signInWithGoogleBrowser()
       return
     }
-    await signInWithGoogle()
-    if (profile.value?.username) {
-      await goAfterLogin()
-    }
+    const next = typeof route.query.next === 'string' ? route.query.next : undefined
+    await signInWithGoogle(next)
   }
   catch (e) {
-    error.value = e instanceof Error ? e.message : 'Sign in failed'
+    const msg = e instanceof Error ? e.message : 'Sign in failed'
+    error.value = msg.includes('auth/popup-closed-by-user')
+      ? 'Sign-in was interrupted. Please try again.'
+      : msg
   }
   finally {
     const { isCapacitorNative } = useCapacitor()

@@ -16,11 +16,11 @@
 
 <script setup lang="ts">
 import { signInWithRedirect } from 'firebase/auth'
-import { isFirebaseRedirectReturn, isOAuthReturnFromGoogle } from '~/shared/auth-bridge'
+import { isFirebaseRedirectReturn, isOAuthReturnFromGoogle, OAUTH_MOBILE_SESSION_KEY } from '~/shared/auth-bridge'
 
 definePageMeta({ layout: false })
 
-const OAUTH_SESSION_KEY = 'lg-oauth-session'
+const OAUTH_SESSION_KEY = OAUTH_MOBILE_SESSION_KEY
 
 const { $firebaseAuth, $googleProvider } = useNuxtApp()
 const { status, error, completePendingRedirect, debug } = useOAuthRedirectFinish('mobile')

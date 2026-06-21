@@ -49,6 +49,7 @@ export function useAuthDebug(screen: string) {
     log(`capacitor native: ${isCapacitorNative()}`)
     log(`userAgent: ${navigator.userAgent.slice(0, 100)}`)
     log(`session lg-oauth-session: ${sessionStorage.getItem('lg-oauth-session') ?? '(unset)'}`)
+    log(`session lg-oauth-web: ${sessionStorage.getItem('lg-oauth-web') ?? '(unset)'}`)
     log(`session lg-oauth-handler-tried: ${sessionStorage.getItem('lg-oauth-handler-tried') ?? '(unset)'}`)
   }
 

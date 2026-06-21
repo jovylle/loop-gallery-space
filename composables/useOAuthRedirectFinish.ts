@@ -5,7 +5,7 @@ import {
   type Auth,
   type UserCredential,
 } from 'firebase/auth'
-import { buildOAuthBridgeQuery, isLikelyGoogleIdToken } from '~/shared/auth-bridge'
+import { buildOAuthBridgeQuery, isLikelyGoogleIdToken, OAUTH_MOBILE_SESSION_KEY } from '~/shared/auth-bridge'
 
 /** Finish Custom Tab / redirect OAuth and hand tokens to /auth/complete for the native app. */
 export function useOAuthRedirectFinish(screen = 'oauth') {
@@ -53,7 +53,7 @@ export function useOAuthRedirectFinish(screen = 'oauth') {
     }
     const target = `/auth/complete${query}`
     debug.log(`redirect → ${debug.redactUrl(`${window.location.origin}${target}`)}`)
-    sessionStorage.removeItem('lg-oauth-session')
+    sessionStorage.removeItem(OAUTH_MOBILE_SESSION_KEY)
     sessionStorage.removeItem('lg-oauth-firebase-hop')
     window.location.replace(target)
     return true

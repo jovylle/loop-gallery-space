@@ -15,15 +15,17 @@
 </template>
 
 <script setup lang="ts">
-import { isOAuthReturnFromGoogle } from '~/shared/auth-bridge'
+import { isOAuthReturnFromGoogle, OAUTH_MOBILE_SESSION_KEY, OAUTH_WEB_SESSION_KEY } from '~/shared/auth-bridge'
 import { firebaseHostingOrigin } from '~/shared/firebase.config'
 
 definePageMeta({ layout: false })
 
-const OAUTH_SESSION_KEY = 'lg-oauth-session'
+const OAUTH_SESSION_KEY = OAUTH_MOBILE_SESSION_KEY
 const FIREBASE_HOP_KEY = 'lg-oauth-firebase-hop'
 
 const { $firebaseAuth } = useNuxtApp()
+const { finishWebRedirectSignIn } = useAuth()
+const { navigateToHref } = useProfileUrl()
 const { status, error, completePendingRedirect, debug } = useOAuthRedirectFinish('handler')
 
 onMounted(async () => {
@@ -45,18 +47,28 @@ onMounted(async () => {
   const authType = new URLSearchParams(window.location.search).get('authType')
   debug.log(`authType: ${authType ?? '(none)'}`)
 
-  // Popup OAuth must run Firebase's hosted handler (postMessage to opener). Our Nuxt page only
-  // finishes redirect flows for Custom Tab /auth/mobile — same hop as pre-Google redirect.
+  // Popup OAuth cannot complete on our custom handler — send users back to login for redirect flow.
   if (authType === 'signInViaPopup') {
-    const target = `${firebaseHostingOrigin}/__/auth/handler${window.location.search}${window.location.hash}`
-    status.value = 'Completing sign-in…'
-    debug.log(`popup hop → ${debug.redactUrl(target)}`)
-    window.location.replace(target)
+    status.value = 'Redirecting…'
+    debug.log('signInViaPopup on custom handler → /login (use redirect flow)')
+    window.location.replace('/login')
     return
   }
 
   try {
     status.value = 'Finishing sign-in…'
+
+    const isMobileOAuth = sessionStorage.getItem(OAUTH_SESSION_KEY) === '1'
+    if (!isMobileOAuth) {
+      const webPath = await finishWebRedirectSignIn()
+      if (webPath) {
+        sessionStorage.removeItem(FIREBASE_HOP_KEY)
+        debug.log(`SUCCESS: web redirect → ${webPath}`)
+        await navigateToHref(webPath)
+        return
+      }
+    }
+
     const done = await completePendingRedirect($firebaseAuth)
     if (done) {
       sessionStorage.removeItem(OAUTH_SESSION_KEY)
@@ -79,8 +91,9 @@ onMounted(async () => {
       debug.log('pre-Google hop: already forwarded to firebaseapp.com')
     }
 
-    error.value =
-      'Could not complete sign-in. Close this tab, open the app, and try again.'
+    error.value = sessionStorage.getItem(OAUTH_WEB_SESSION_KEY) === '1'
+      ? 'Could not complete sign-in. Go back to login and try again.'
+      : 'Could not complete sign-in. Close this tab, open the app, and try again.'
     status.value = ''
     debug.log('FAIL: getRedirectResult returned no user')
     debug.log('hint: check Google OAuth redirect URI includes /__/auth/handler on loopgallery.a-u.us')

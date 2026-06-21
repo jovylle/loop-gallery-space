@@ -1,3 +1,12 @@
+/** Custom Tab / Android redirect OAuth (signOut + bridge tokens to the native app). */
+export const OAUTH_MOBILE_SESSION_KEY = 'lg-oauth-session'
+
+/** Browser redirect OAuth from /login (stay signed in on the site). */
+export const OAUTH_WEB_SESSION_KEY = 'lg-oauth-web'
+
+/** Post-login path stored before web redirect (?next=…). */
+export const OAUTH_WEB_NEXT_KEY = 'lg-oauth-next'
+
 /** Manual key=value parse (avoid URLSearchParams — corrupts JWT `+` in query strings). */
 function parseBridgeParams(body: string) {
   let googleIdToken: string | null = null

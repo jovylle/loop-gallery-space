@@ -1,10 +1,14 @@
 import {
   getRedirectResult,
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
   type User,
 } from 'firebase/auth'
+import {
+  OAUTH_WEB_NEXT_KEY,
+  OAUTH_WEB_SESSION_KEY,
+} from '~/shared/auth-bridge'
 import { isSameGalleryAppUrl } from '~/shared/host'
 import type { AuthUser } from '~/shared/types'
 
@@ -82,7 +86,38 @@ export function useAuth() {
     await Browser.open({ url: `${site}/auth/mobile` })
   }
 
-  async function signInWithGoogle() {
+  function markWebOAuthIntent(next?: string) {
+    if (!import.meta.client) return
+    sessionStorage.setItem(OAUTH_WEB_SESSION_KEY, '1')
+    if (next) sessionStorage.setItem(OAUTH_WEB_NEXT_KEY, next)
+    else sessionStorage.removeItem(OAUTH_WEB_NEXT_KEY)
+  }
+
+  /** Finish browser redirect sign-in on /__/auth/handler (not the mobile token bridge). */
+  async function finishWebRedirectSignIn(): Promise<string | null> {
+    if (!$firebaseAuth || !import.meta.client) return null
+    if (sessionStorage.getItem(OAUTH_WEB_SESSION_KEY) !== '1') return null
+
+    const result = await getRedirectResult($firebaseAuth)
+    if (!result?.user) return null
+
+    sessionStorage.removeItem(OAUTH_WEB_SESSION_KEY)
+    const next = sessionStorage.getItem(OAUTH_WEB_NEXT_KEY)
+    sessionStorage.removeItem(OAUTH_WEB_NEXT_KEY)
+
+    await refreshProfile()
+    if (profile.value?.needsOnboarding) {
+      await completeOnboarding()
+    }
+
+    const username = profile.value?.username
+    if (!username) return '/dashboard'
+
+    const { resolvePostLoginPath } = useProfileUrl()
+    return resolvePostLoginPath(next ?? undefined, username)
+  }
+
+  async function signInWithGoogle(next?: string) {
     if (!$firebaseAuth || !$googleProvider) {
       throw new Error('Firebase not configured')
     }
@@ -93,11 +128,9 @@ export function useAuth() {
       await signInWithGoogleBrowser()
       return
     }
-    await signInWithPopup($firebaseAuth, $googleProvider)
-    await refreshProfile()
-    if (profile.value?.needsOnboarding) {
-      await completeOnboarding()
-    }
+    // Popup OAuth breaks on our custom /__/auth/handler (auth/popup-closed-by-user).
+    markWebOAuthIntent(next)
+    await signInWithRedirect($firebaseAuth, $googleProvider)
   }
 
   async function logout() {
@@ -143,7 +176,6 @@ export function useAuth() {
     }
 
     initNativeAuthBridge()
-    void finishRedirectSignIn()
 
     onAuthStateChanged($firebaseAuth, async (u) => {
       user.value = u
@@ -168,6 +200,8 @@ export function useAuth() {
     signInWithGoogle,
     signInWithGoogleNative,
     signInWithGoogleBrowser,
+    markWebOAuthIntent,
+    finishWebRedirectSignIn,
     completeOnboarding,
     logout,
     refreshProfile,
